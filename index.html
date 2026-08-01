@@ -4,7 +4,10 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="ClearDays" />
 <meta name="theme-color" content="#697a95" />
+<link rel="apple-touch-icon" href="apple-touch-icon.png" />
+<link rel="icon" type="image/png" sizes="512x512" href="icon-512.png" />
 <title>Clear Days</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -68,6 +71,7 @@
     color: #fff;
     box-shadow: 0 8px 22px -12px rgba(79,105,119,0.6);
   }
+  .hero-id { text-align: center; }
   .hero-label { font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase; opacity: 0.82; font-weight: 500; }
   .hero-num { font-family: var(--brand); font-weight: 700; font-size: 62px; line-height: 1; margin: 4px 0 2px; }
   .hero-unit { font-size: 14px; opacity: 0.9; font-weight: 300; }
@@ -113,7 +117,7 @@
   .cal-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
   .dow { display: grid; grid-template-columns: repeat(7, 1fr); background: rgba(105,122,149,0.06); }
   .dow div { text-align: center; font-size: 10.5px; font-weight: 500; color: var(--muted); padding: 8px 0; letter-spacing: 0.4px; }
-  .mgrid { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .mgrid { display: grid; grid-template-columns: repeat(7, 1fr); border-bottom: 1px solid var(--line-soft); }
   .mcell { aspect-ratio: 1; border-top: 1px solid var(--line-soft); border-right: 1px solid var(--line-soft); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; }
   .mcell:nth-child(7n) { border-right: 0; }
   .mcell.empty { cursor: default; }
@@ -181,7 +185,7 @@
   .badge .b-ico { font-size: 20px; }
   .badge .b-name { font-family: var(--brand); font-weight: 600; font-size: 12.5px; color: var(--charcoal); margin-top: 3px; }
   .badge .b-days { font-size: 10.5px; color: var(--muted); }
-  .ms-empty { font-size: 13px; color: var(--muted); padding: 2px 2px 4px; }
+  .ms-empty { font-size: 13px; color: var(--muted); padding: 2px 2px 4px; grid-column: 1 / -1; text-align: center; }
 
   /* Bottom sheet */
   .overlay { position: fixed; inset: 0; background: rgba(24,27,30,0.42); opacity: 0; pointer-events: none; transition: opacity 0.22s; z-index: 40; }
@@ -739,20 +743,15 @@
   }
   function plantSVG(days) {
     var st = plantStage(days), c = "";
-    if (st <= 1) {
-      c += soilBlock();
-      if (st === 0) {
-        c += '<ellipse cx="70" cy="118" rx="7" ry="9" fill="' + P.seed + '"/><path d="M70 111 q3 4 0 8" stroke="#b8a67e" stroke-width="1.2" fill="none"/>';
-        c += star(70, 104, 3);
-      } else {
-        c += '<ellipse cx="70" cy="112" rx="6" ry="7.5" fill="' + P.seed + '"/>';
-        c += '<path d="M70 119 q-3 8 -7 15 M70 119 q1 9 5 14 M70 119 q0 9 -1 13" stroke="' + P.root + '" stroke-width="1.6" fill="none" stroke-linecap="round"/>';
-        c += '<path d="M70 108 q1 -5 3 -7" stroke="' + P.green + '" stroke-width="2" fill="none" stroke-linecap="round"/>';
-      }
-      return svgWrap(c);
-    }
     c += soilMound();
-    if (st === 2) {
+    if (st === 0) {
+      c += '<ellipse cx="70" cy="117" rx="7" ry="9" fill="' + P.seed + '"/><path d="M70 110 q3 4 0 8" stroke="#b8a67e" stroke-width="1.2" fill="none"/>';
+      c += star(70, 101, 3);
+    } else if (st === 1) {
+      c += '<ellipse cx="70" cy="118" rx="6" ry="7.5" fill="' + P.seed + '"/>';
+      c += '<path d="M70 112 q1 -7 4 -11" stroke="' + P.green + '" stroke-width="2.4" fill="none" stroke-linecap="round"/>';
+      c += '<path d="M70 123 q-3 3 -5 7 M70 123 q3 3 5 7" stroke="' + P.root + '" stroke-width="1.5" fill="none" stroke-linecap="round"/>';
+    } else if (st === 2) {
       c += '<path d="M70 123 C70 108 69 96 71 86" stroke="' + P.stem + '" stroke-width="3.4" fill="none" stroke-linecap="round"/>';
       c += '<path d="M71 86 q9 -4 12 3 q-9 3 -12 -3 z" fill="' + P.green2 + '"/>';
     } else if (st === 3) {
