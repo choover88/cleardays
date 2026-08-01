@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="theme-color" content="#697a95" />
+<title>Clear Days</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --blue: #697a95;        /* primary, favorite */
+    --blue-deep: #4f6977;
+    --blue-mid: #678594;
+    --blue-light: #a9bbc4;
+    --navy: #264a73;
+    --teal: #225c63;
+    --mauve: #8a7fa2;
+    --purple: #684a7b;
+    --plum: #452e52;
+    --berry: #7a315c;
+    --charcoal: #3b4146;
+    --ink: #181b1e;
+    --bg: #f7f8f8;
+    --card: #ffffff;
+    --line: #e3e7ea;
+    --line-soft: #eef1f3;
+    --gray: #a8a7a5;
+    --muted: #7c8894;
+    --radius: 16px;
+    --radius-sm: 11px;
+    --sans: 'Poppins', system-ui, sans-serif;
+    --brand: 'Poppins', system-ui, sans-serif;
+    --serif: 'Poppins', system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { background: var(--bg); }
+  body {
+    font-family: var(--sans);
+    color: var(--ink);
+    line-height: 1.5;
+    padding-bottom: 48px;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 620px; margin: 0 auto; padding: 0 16px; }
+
+  /* Header */
+  header {
+    position: sticky; top: 0; z-index: 20;
+    background: rgba(247,248,248,0.92);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line-soft);
+  }
+  .head-inner { max-width: 620px; margin: 0 auto; padding: 14px 16px 12px; display: flex; align-items: baseline; justify-content: space-between; }
+  .brand { font-family: var(--brand); font-weight: 700; font-size: 21px; color: var(--blue); letter-spacing: 0.2px; }
+  .brand span { color: var(--blue-deep); }
+  .head-sub { font-family: var(--sans); font-weight: 300; font-style: italic; font-size: 12.5px; color: var(--muted); line-height: 1.1; margin-top: 1px; }
+
+  /* Hero */
+  .hero {
+    margin-top: 16px;
+    background: linear-gradient(150deg, var(--blue) 0%, var(--blue-deep) 100%);
+    border-radius: var(--radius);
+    padding: 22px 20px 20px;
+    color: #fff;
+    box-shadow: 0 8px 22px -12px rgba(79,105,119,0.6);
+  }
+  .hero-label { font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase; opacity: 0.82; font-weight: 500; }
+  .hero-num { font-family: var(--brand); font-weight: 700; font-size: 62px; line-height: 1; margin: 4px 0 2px; }
+  .hero-unit { font-size: 14px; opacity: 0.9; font-weight: 300; }
+  .hero-affirm { font-family: var(--sans); font-weight: 300; font-style: italic; font-size: 14.5px; opacity: 0.95; margin-top: 12px; line-height: 1.35; }
+  .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
+  .hstat { background: rgba(255,255,255,0.13); border-radius: var(--radius-sm); padding: 10px 8px; text-align: center; }
+  .hstat b { font-family: var(--brand); font-weight: 600; font-size: 19px; display: block; }
+  .hstat small { font-size: 10.5px; opacity: 0.85; letter-spacing: 0.3px; }
+
+  /* Section titles */
+  .sec-title { font-family: var(--brand); font-weight: 700; font-size: 15px; color: var(--charcoal); margin: 26px 2px 12px; display: flex; align-items: center; justify-content: space-between; }
+  .sec-title .link { font-family: var(--sans); font-size: 12.5px; font-weight: 500; color: var(--blue); cursor: pointer; }
+
+  /* Goal dates */
+  .goals-scroll { display: flex; gap: 10px; overflow-x: auto; padding: 2px 2px 6px; scrollbar-width: none; }
+  .goals-scroll::-webkit-scrollbar { display: none; }
+  .goal-card { flex: 0 0 auto; min-width: 108px; background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 8px 11px; cursor: pointer; position: relative; }
+  .goal-card .g-count { font-family: var(--brand); font-weight: 700; font-size: 19px; color: var(--blue); line-height: 1; }
+  .goal-card .g-count small { font-family: var(--sans); font-size: 10.5px; font-weight: 400; color: var(--muted); }
+  .goal-card .g-label { font-size: 11.5px; color: var(--charcoal); margin-top: 3px; font-weight: 500; }
+  .goal-card .g-date { font-size: 10px; color: var(--muted); margin-top: 0; }
+  .goal-card.past { opacity: 0.9; }
+  .goal-card.past .g-count { font-size: 13px; }
+  .goal-card.past.win { border-color: var(--teal); }
+  .goal-card.past.win .g-count { color: var(--teal); }
+  .goal-card.past.slip .g-count { color: var(--berry); }
+  .goal-add { flex: 0 0 auto; min-width: 74px; border: 1px dashed var(--blue-light); background: rgba(105,122,149,0.05); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; color: var(--blue); font-size: 11.5px; font-weight: 500; gap: 2px; }
+  .goal-add .plus { font-size: 19px; line-height: 1; }
+  .goals-empty { font-size: 13px; color: var(--muted); padding: 4px 2px; }
+
+  /* View toggle */
+  .toggle { display: inline-flex; background: #eef1f3; border-radius: 999px; padding: 3px; margin-bottom: 12px; }
+  .toggle button { border: 0; background: none; font-family: var(--sans); font-size: 13px; font-weight: 500; color: var(--muted); padding: 7px 20px; border-radius: 999px; cursor: pointer; transition: all 0.15s; }
+  .toggle button.on { background: #fff; color: var(--blue-deep); box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+
+  /* Calendar nav */
+  .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .cal-nav .navbtn { width: 36px; height: 36px; border-radius: 50%; border: 1px solid var(--line); background: #fff; cursor: pointer; font-size: 17px; color: var(--charcoal); display: flex; align-items: center; justify-content: center; }
+  .cal-nav .navbtn:active { background: var(--line-soft); }
+  .cal-nav .cal-period { font-family: var(--brand); font-weight: 700; font-size: 17px; color: var(--charcoal); }
+
+  /* Month grid */
+  .cal-card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; }
+  .dow { display: grid; grid-template-columns: repeat(7, 1fr); background: rgba(105,122,149,0.06); }
+  .dow div { text-align: center; font-size: 10.5px; font-weight: 500; color: var(--muted); padding: 8px 0; letter-spacing: 0.4px; }
+  .mgrid { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .mcell { aspect-ratio: 1; border-top: 1px solid var(--line-soft); border-right: 1px solid var(--line-soft); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; position: relative; }
+  .mcell:nth-child(7n) { border-right: 0; }
+  .mcell.empty { cursor: default; }
+  .mcell.future { opacity: 0.32; cursor: default; }
+  .mcell .dnum { font-size: 12.5px; font-weight: 500; color: var(--charcoal); }
+  .mcell .dmark { font-size: 11px; font-weight: 600; margin-top: 1px; }
+  .mcell.today { box-shadow: inset 0 0 0 2px var(--navy); }
+  .mcell .flags { position: absolute; bottom: 3px; display: flex; gap: 3px; }
+  .mcell .flag { width: 6px; height: 6px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,0.9); }
+  .flag.ex { background: #2f8f7a; }
+  .flag.mt { background: var(--mauve); }
+
+  /* tier fills (shared month + year) */
+  .t-af  { background: var(--blue); }
+  .t-af .dnum { color: #fff; }
+  .t-af .dmark { color: #fff; font-size: 12px; }
+  .t-12  { background: var(--blue-light); }
+  .t-12 .dnum, .t-12 .dmark { color: #2c3b47; }
+  .t-34  { background: var(--mauve); }
+  .t-34 .dnum, .t-34 .dmark { color: #fff; }
+  .t-56  { background: var(--berry); }
+  .t-56 .dnum, .t-56 .dmark { color: #fff; }
+  .t-7   { background: var(--plum); }
+  .t-7 .dnum, .t-7 .dmark { color: #fff; }
+
+  /* Year grid */
+  .ygrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px 14px; }
+  .ymonth { }
+  .ymonth h4 { font-family: var(--brand); font-weight: 700; font-size: 12px; letter-spacing: 0.6px; color: var(--charcoal); margin-bottom: 6px; text-align: center; text-transform: uppercase; }
+  .ydow { display: grid; grid-template-columns: repeat(7, 1fr); margin-bottom: 4px; }
+  .ydow span { text-align: center; font-size: 8px; color: var(--gray); font-weight: 600; }
+  .ycells { display: grid; grid-template-columns: repeat(7, 1fr); }
+  .ycell { aspect-ratio: 1; background: #fff; box-sizing: border-box; border: 2px solid #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .ycell.pad { background: transparent; border: none; cursor: default; }
+  .ynum { font-family: var(--sans); font-weight: 600; font-size: 9px; line-height: 1; }
+  .ycell.t-12 .ynum { color: #2c3b47; }
+  .ycell.t-34 .ynum, .ycell.t-56 .ynum, .ycell.t-7 .ynum { color: #fff; }
+  .ycell.t-af { background: var(--blue); }
+  .ycell.t-12 { background: var(--blue-light); }
+  .ycell.t-34 { background: var(--mauve); }
+  .ycell.t-56 { background: var(--berry); }
+  .ycell.t-7 { background: var(--plum); }
+  .ycell.future { cursor: default; }
+  .ycell.today { box-shadow: inset 0 0 0 2px var(--navy); }
+  /* perimeter outline that hugs the month shape */
+  .ycell.eT { border-top: 3px solid var(--charcoal); }
+  .ycell.eR { border-right: 3px solid var(--charcoal); }
+  .ycell.eB { border-bottom: 3px solid var(--charcoal); }
+  .ycell.eL { border-left: 3px solid var(--charcoal); }
+
+  .legend { display: flex; flex-wrap: wrap; gap: 10px 14px; margin: 12px 2px 0; }
+  .legend span { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .legend i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+  /* Milestones */
+  .ms-next { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .ms-next .ms-top { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--muted); }
+  .ms-next .ms-top b { font-family: var(--brand); color: var(--charcoal); font-weight: 600; }
+  .ms-bar { height: 9px; background: var(--line-soft); border-radius: 999px; margin-top: 10px; overflow: hidden; }
+  .ms-bar i { display: block; height: 100%; background: linear-gradient(90deg, var(--blue-light), var(--blue)); border-radius: 999px; transition: width 0.4s; }
+  .ms-sub { font-size: 12px; color: var(--muted); margin-top: 8px; }
+  .badges { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+  .badge { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 13px 8px; text-align: center; opacity: 0.5; }
+  .badge.earned { opacity: 1; border-color: var(--blue-light); background: linear-gradient(160deg, #fff, rgba(105,122,149,0.07)); }
+  .badge .b-ico { font-size: 20px; }
+  .badge .b-name { font-family: var(--brand); font-weight: 600; font-size: 12.5px; color: var(--charcoal); margin-top: 3px; }
+  .badge .b-days { font-size: 10.5px; color: var(--muted); }
+  .ms-empty { font-size: 13px; color: var(--muted); padding: 2px 2px 4px; }
+
+  /* Bottom sheet */
+  .overlay { position: fixed; inset: 0; background: rgba(24,27,30,0.42); opacity: 0; pointer-events: none; transition: opacity 0.22s; z-index: 40; }
+  .overlay.on { opacity: 1; pointer-events: auto; }
+  .sheet { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; background: var(--card); border-radius: 22px 22px 0 0; padding: 8px 18px calc(20px + env(safe-area-inset-bottom)); transform: translateY(102%); transition: transform 0.28s cubic-bezier(.2,.8,.2,1); max-width: 620px; margin: 0 auto; max-height: 88vh; overflow-y: auto; }
+  .sheet.on { transform: translateY(0); }
+  .grabber { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 6px auto 12px; }
+  .sheet h3 { font-family: var(--brand); font-weight: 700; font-size: 17px; color: var(--charcoal); }
+  .sheet .s-date { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; }
+  .field-label { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.3px; margin: 16px 0 8px; text-transform: uppercase; }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { min-width: 42px; height: 42px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--charcoal); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.12s; }
+  .chip.zero { border-color: rgba(105,122,149,0.5); color: var(--blue); }
+  .chip.sel { transform: translateY(-1px); }
+  .chip.sel.zero { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .chip[data-tier="12"].sel { background: var(--blue-light); border-color: var(--blue-light); color: #2c3b47; }
+  .chip[data-tier="34"].sel { background: var(--mauve); border-color: var(--mauve); color: #fff; }
+  .chip[data-tier="56"].sel { background: var(--berry); border-color: var(--berry); color: #fff; }
+  .chip[data-tier="7"].sel  { background: var(--plum); border-color: var(--plum); color: #fff; }
+
+  .toggle-row { display: flex; gap: 10px; }
+  .yn { flex: 1; height: 46px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-family: var(--sans); font-size: 13.5px; font-weight: 500; color: var(--charcoal); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 7px; }
+  .yn.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .yn .ic { font-size: 16px; }
+
+  .moods { display: flex; gap: 7px; }
+  .mood { flex: 1; aspect-ratio: 1; max-width: 58px; border-radius: 12px; border: 1px solid var(--line); background: #fff; cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+  .mood.on { border-color: var(--blue); background: rgba(105,122,149,0.1); transform: translateY(-1px); }
+
+  textarea { width: 100%; min-height: 70px; border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; font-family: var(--sans); font-size: 14px; color: var(--ink); resize: vertical; background: #fdfdfd; }
+  textarea:focus { outline: none; border-color: var(--blue); }
+
+  .sheet-actions { display: flex; gap: 10px; margin-top: 22px; }
+  .btn { flex: 1; height: 50px; border-radius: 13px; border: 0; font-family: var(--sans); font-size: 15px; font-weight: 600; cursor: pointer; }
+  .btn-primary { background: var(--blue); color: #fff; }
+  .btn-primary:disabled { background: var(--line); color: var(--gray); cursor: default; }
+  .btn-ghost { background: none; border: 1px solid var(--line); color: var(--muted); flex: 0 0 auto; width: 50px; font-size: 18px; }
+
+  /* mini form inside goal modal */
+  .gform input { width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 12px; padding: 0 13px; font-family: var(--sans); font-size: 14px; color: var(--ink); margin-bottom: 10px; }
+  .gform input:focus { outline: none; border-color: var(--blue); }
+  .glist { margin-top: 6px; }
+  .grow { display: flex; align-items: center; justify-content: space-between; padding: 11px 0; border-bottom: 1px solid var(--line-soft); }
+  .grow .gl-info b { font-family: var(--sans); font-weight: 500; font-size: 14px; color: var(--charcoal); }
+  .grow .gl-info small { display: block; font-size: 11.5px; color: var(--muted); }
+  .grow .gl-del { border: 0; background: none; color: var(--berry); font-size: 13px; cursor: pointer; font-weight: 500; }
+
+  /* toast */
+  .toast { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px); background: var(--charcoal); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 13.5px; font-weight: 500; opacity: 0; pointer-events: none; transition: all 0.25s; z-index: 60; box-shadow: 0 8px 24px -8px rgba(0,0,0,0.4); }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast.dry { background: var(--blue); }
+
+  .foot-link { display: block; text-align: center; margin-top: 30px; color: var(--blue); font-weight: 600; font-size: 14px; text-decoration: none; }
+  .foot-link:active { opacity: 0.7; }
+  .foot { text-align: center; font-size: 11px; color: var(--gray); margin-top: 12px; }
+  /* settings gear + header layout */
+  .head-inner { align-items: center; }
+  .head-left { display: flex; flex-direction: column; }
+  .gear { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: #fff; font-size: 17px; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
+  .gear:active { background: var(--line-soft); }
+  /* hero start-date line */
+  .hero-since { font-size: 12.5px; opacity: 0.92; margin-top: 6px; cursor: pointer; display: inline-block; line-height: 1.5; }
+  .hero-since .since-date { font-weight: 600; }
+  .hero-since u { text-underline-offset: 2px; }
+  /* settings controls */
+  .setting-date { width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 12px; padding: 0 13px; font-family: var(--sans); font-size: 14px; color: var(--ink); background: #fdfdfd; }
+  .setting-date:focus { outline: none; border-color: var(--blue); }
+  .setting-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+  .setting-hint { font-size: 12.5px; color: var(--muted); }
+  .linkbtn { border: 0; background: none; color: var(--berry); font-size: 13px; font-weight: 500; cursor: pointer; }
+  .meeting-link { display: block; border: 1px solid var(--line); border-radius: 12px; padding: 13px 14px; text-decoration: none; color: var(--blue-deep); font-weight: 600; font-size: 14.5px; }
+  .meeting-link span { display: block; font-weight: 400; font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .meeting-link:active { background: var(--line-soft); }
+  .meeting-link.small { padding: 10px 12px; font-size: 13px; margin-top: 10px; color: var(--blue); }
+  /* plant hero pieces */
+  .hero-plant { display: flex; justify-content: center; align-items: flex-end; margin-top: 12px; background: #fff; border-radius: 14px; padding: 10px 8px 6px; }
+  .hero-plant svg { width: 128px; height: auto; display: block; }
+  .hero-side { margin-top: 14px; display: flex; flex-direction: column; gap: 11px; }
+  .hero-milestone { font-size: 12.5px; line-height: 1.35; opacity: 0.95; text-align: center; }
+  .commit { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; width: 100%; background: rgba(255,255,255,0.13); border: 0; border-radius: 14px; padding: 16px 12px; cursor: pointer; color: #fff; text-align: center; font-family: var(--sans); }
+  .commit:active { background: rgba(255,255,255,0.24); }
+  .commit-box { width: 34px; height: 34px; border-radius: 9px; border: 2px solid rgba(255,255,255,0.8); flex: 0 0 auto; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--blue); font-weight: 700; }
+  .commit-box.on { background: #fff; border-color: #fff; }
+  .commit-text { font-size: 12.5px; font-weight: 600; line-height: 1.25; }
+
+  /* mini stats under hero */
+  .mini-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; }
+  .mini-stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 11px 8px; text-align: center; }
+  .mini-stat b { font-family: var(--brand); font-weight: 700; font-size: 18px; color: var(--blue-deep); display: block; }
+  .mini-stat small { font-size: 10.5px; color: var(--muted); letter-spacing: 0.3px; }
+  .year-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 8px; margin-bottom: 14px; }
+
+  /* meetings list */
+  .meetings { margin-top: 8px; }
+  .mtg { display: flex; align-items: center; justify-content: space-between; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; text-decoration: none; margin-bottom: 8px; }
+  .mtg:active { background: var(--line-soft); }
+  .mtg .m-name { font-weight: 600; font-size: 14px; color: var(--blue-deep); }
+  .mtg .m-who { font-size: 11.5px; color: var(--muted); margin-top: 1px; }
+  .mtg .m-go { font-size: 13px; color: var(--blue); font-weight: 600; flex: 0 0 auto; }
+
+  @media (min-width: 520px) {
+    .hero { display: flex; align-items: stretch; gap: 0; }
+    .hero-id { order: 0; flex: 0 0 150px; align-self: center; text-align: center; padding-right: 20px; }
+    .hero-plant { order: 1; flex: 1 1 auto; align-self: stretch; align-items: center; margin: 0 6px; padding: 8px; }
+    .hero-plant svg { width: auto; max-width: 150px; max-height: 150px; }
+    .hero-side { order: 2; flex: 0 0 172px; align-self: stretch; justify-content: center; margin-top: 0; padding-left: 20px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="head-inner">
+    <div class="head-left">
+      <div class="brand">Clear<span>Days</span></div>
+      <div class="head-sub">one day at a time</div>
+    </div>
+    <button class="gear" id="openSettings" aria-label="Settings">⚙</button>
+  </div>
+</header>
+
+<div class="wrap">
+  <!-- Hero -->
+  <div class="hero">
+    <div class="hero-id">
+      <div class="hero-label" id="heroLabel">Current streak</div>
+      <div class="hero-num" id="heroNum">0</div>
+      <div class="hero-unit" id="heroUnit">days clear</div>
+      <div class="hero-since" id="heroSince"><u>Set your start date</u></div>
+    </div>
+    <div class="hero-plant" id="heroPlant"></div>
+    <div class="hero-side">
+      <div class="hero-milestone" id="heroMilestone"></div>
+      <button class="commit" id="commitBtn" type="button">
+        <span class="commit-box" id="commitBox"></span>
+        <span class="commit-text" id="commitText">Today's plan: clear day</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="mini-stats">
+    <div class="mini-stat"><b id="mDrinks">0</b><small id="mDrinksL">DRINKS</small></div>
+    <div class="mini-stat"><b id="mActive">0</b><small id="mActiveL">ACTIVE</small></div>
+    <div class="mini-stat"><b id="mMeet">0</b><small id="mMeetL">MEETINGS</small></div>
+  </div>
+
+  <!-- Goal dates -->
+  <div class="sec-title">Working toward <span class="link" id="manageGoals">Manage</span></div>
+  <div class="goals-scroll" id="goalsScroll"></div>
+
+  <!-- Calendar -->
+  <div class="sec-title" style="margin-bottom:14px;">Calendar</div>
+  <div class="toggle">
+    <button id="tabMonth" class="on">Month</button>
+    <button id="tabYear">Year</button>
+  </div>
+  <div class="cal-nav">
+    <button class="navbtn" id="prevBtn">‹</button>
+    <div class="cal-period" id="calPeriod">—</div>
+    <button class="navbtn" id="nextBtn">›</button>
+  </div>
+
+  <div id="monthView">
+    <div class="cal-card">
+      <div class="dow"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div>
+      <div class="mgrid" id="mgrid"></div>
+    </div>
+  </div>
+
+  <div id="yearView" style="display:none;">
+    <div class="year-stats" id="yearStats"></div>
+    <div class="ygrid" id="ygrid"></div>
+    <div class="sec-title" id="allMilestonesTitle" style="margin-top:22px;">All milestones</div>
+    <div class="badges" id="badgesAll"></div>
+  </div>
+
+  <div class="legend">
+    <span><i style="background:var(--blue)"></i>Clear</span>
+    <span><i style="background:#fff;border:1px solid var(--line)"></i>Untracked</span>
+    <span><i style="background:var(--blue-light)"></i>1–2</span>
+    <span><i style="background:var(--mauve)"></i>3–4</span>
+    <span><i style="background:var(--berry)"></i>5–6</span>
+    <span><i style="background:var(--plum)"></i>7+</span>
+    <span><i style="width:8px;height:8px;border-radius:50%;background:#2f8f7a"></i>Exercise</span>
+    <span><i style="width:8px;height:8px;border-radius:50%;background:var(--mauve)"></i>Meeting</span>
+  </div>
+
+  <!-- Milestones (main) -->
+  <div id="msSection">
+    <div class="sec-title">Milestones <span class="link" id="seeAllMs">See all →</span></div>
+    <div class="ms-next" id="msNext"></div>
+    <div class="badges" id="badges"></div>
+  </div>
+
+  <!-- Meetings -->
+  <div class="sec-title" id="meetings">Find a meeting</div>
+  <div class="meetings" id="meetingsList"></div>
+
+  <div class="foot">Saved on this device. Add to your Home Screen for quick access.</div>
+</div>
+
+<!-- Entry sheet -->
+<div class="overlay" id="overlay"></div>
+<div class="sheet" id="sheet">
+  <div class="grabber"></div>
+  <h3 id="sheetTitle">Log a day</h3>
+  <div class="s-date" id="sheetDate"></div>
+
+  <div class="field-label">Drinks</div>
+  <div class="chips" id="drinkChips"></div>
+
+  <div class="field-label">Exercise</div>
+  <div class="toggle-row">
+    <button class="yn" id="exYes"><span class="ic">🏃‍♀️</span> Yes</button>
+    <button class="yn" id="exNo">No</button>
+  </div>
+
+  <div class="field-label">Meeting attendance</div>
+  <div class="toggle-row">
+    <button class="yn" id="mtYes"><span class="ic">🤝</span> Yes</button>
+    <button class="yn" id="mtNo">No</button>
+  </div>
+  <a class="meeting-link small" id="sheetMeetingLink" href="#meetings">Find a meeting ↗</a>
+
+  <div class="field-label">Mood</div>
+  <div class="moods" id="moods"></div>
+
+  <div class="field-label">Reflection <span style="text-transform:none;font-weight:400;">· optional</span></div>
+  <textarea id="note" placeholder="A note for future you..."></textarea>
+
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" id="clearDay" title="Clear this day">🗑</button>
+    <button class="btn btn-primary" id="saveDay" disabled>Log day</button>
+  </div>
+</div>
+
+<!-- Goal modal -->
+<div class="overlay" id="gOverlay"></div>
+<div class="sheet" id="gSheet">
+  <div class="grabber"></div>
+  <h3>Working toward</h3>
+  <div class="s-date">Mark the dates you want to reach clear. Some days are harder than others.</div>
+  <div class="gform">
+    <input type="text" id="gLabel" placeholder="What is it? (e.g. Sarah's wedding)" maxlength="42" />
+    <input type="date" id="gDate" />
+    <button class="btn btn-primary" id="gAdd" style="width:100%;">Add date</button>
+  </div>
+  <div class="glist" id="gList"></div>
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" id="gClose" style="width:100%;flex:1;font-size:15px;">Done</button>
+  </div>
+</div>
+
+<!-- Settings sheet -->
+<div class="overlay" id="sOverlay"></div>
+<div class="sheet" id="sSheet">
+  <div class="grabber"></div>
+  <h3>Settings</h3>
+  <div class="s-date">Everything saves on this device.</div>
+
+  <div class="field-label">Find a meeting</div>
+  <div class="meetings" id="meetingsListSettings"></div>
+
+  <div class="sheet-actions">
+    <button class="btn btn-primary" id="closeSettings" style="flex:1;">Done</button>
+  </div>
+</div>
+
+<!-- Start date sheet -->
+<div class="overlay" id="dOverlay"></div>
+<div class="sheet" id="dSheet">
+  <div class="grabber"></div>
+  <h3>Clear start date</h3>
+  <div class="s-date">The day your clear stretch began. Your count grows from this date.</div>
+  <input type="date" id="startDateInput" class="setting-date" />
+  <div class="setting-row">
+    <span class="setting-hint" id="startHint">Not set</span>
+    <button class="linkbtn" id="clearStart">Clear date</button>
+  </div>
+  <div class="sheet-actions">
+    <button class="btn btn-primary" id="closeStart" style="flex:1;">Done</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  var KEY = "cleardays_v1";
+  var db = load();
+
+  function load() {
+    try {
+      var raw = localStorage.getItem(KEY);
+      if (raw) { var p = JSON.parse(raw); if (!p.days) p.days = {}; if (!p.goals) p.goals = []; if (!("startDate" in p)) p.startDate = null; if (!("commitDate" in p)) p.commitDate = null; return p; }
+    } catch (e) {}
+    return { days: {}, goals: [], startDate: null, commitDate: null };
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
+
+  // Date helpers
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+  function keyOf(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function todayKey() { return keyOf(new Date()); }
+  function parseKey(k) { var p = k.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function addDays(k, n) { var d = parseKey(k); d.setDate(d.getDate() + n); return keyOf(d); }
+  function daysSince(k) { return Math.floor((parseKey(todayKey()) - parseKey(k)) / 86400000); }
+  function fmtLong(k) { var d = parseKey(k); return MONTHS_SHORT[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear(); }
+
+  var MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+  var MONTHS_SHORT = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+  // View state
+  var mode = "month";
+  var vy = new Date().getFullYear();
+  var vm = new Date().getMonth();
+
+  // Tier classing
+  function tierClass(drinks) {
+    if (drinks === 0) return "t-af";
+    if (drinks <= 2) return "t-12";
+    if (drinks <= 4) return "t-34";
+    if (drinks <= 6) return "t-56";
+    return "t-7";
+  }
+  function markText(drinks) {
+    if (drinks === 0) return "\u2726";
+    if (drinks >= 7) return "7+";
+    return "" + drinks;
+  }
+
+  // Streaks (a day is clear only if explicitly logged as 0)
+  function isClear(k) { var e = db.days[k]; return !!e && e.drinks === 0; }
+  function isLogged(k) { var e = db.days[k]; return !!e && typeof e.drinks === "number"; }
+
+  function currentStreak() {
+    var start = todayKey();
+    if (!isLogged(start)) start = addDays(start, -1); // don't break on an unlogged today
+    var count = 0, k = start;
+    while (isClear(k)) { count++; k = addDays(k, -1); }
+    return count;
+  }
+  function longestStreak() {
+    var keys = Object.keys(db.days).filter(function (k) { return db.days[k].drinks === 0; });
+    if (!keys.length) return 0;
+    var set = {}; keys.forEach(function (k) { set[k] = true; });
+    var best = 0;
+    keys.forEach(function (k) {
+      if (set[addDays(k, -1)]) return; // not a run start
+      var run = 0, cur = k;
+      while (set[cur]) { run++; cur = addDays(cur, 1); }
+      if (run > best) best = run;
+    });
+    return best;
+  }
+  function totalClear() {
+    var n = 0;
+    for (var k in db.days) { if (db.days[k].drinks === 0) n++; }
+    return n;
+  }
+  function meetingsAttended() {
+    var n = 0;
+    for (var k in db.days) { if (db.days[k].meeting === true) n++; }
+    return n;
+  }
+  function clearDays() { return db.startDate ? Math.max(0, daysSince(db.startDate)) : currentStreak(); }
+  function streakStartKey() {
+    if (currentStreak() === 0) return null;
+    var start = todayKey(); if (!isLogged(start)) start = addDays(start, -1);
+    var k = start, last = null;
+    while (isClear(k)) { last = k; k = addDays(k, -1); }
+    return last;
+  }
+  function drinksInMonth(y, m) {
+    var pre = y + "-" + pad(m + 1) + "-", sum = 0;
+    for (var k in db.days) { if (k.indexOf(pre) === 0) { var e = db.days[k]; if (typeof e.drinks === "number") sum += e.drinks; } }
+    return sum;
+  }
+  function countInMonth(y, m, field) {
+    var pre = y + "-" + pad(m + 1) + "-", n = 0;
+    for (var k in db.days) { if (k.indexOf(pre) === 0 && db.days[k][field] === true) n++; }
+    return n;
+  }
+  function yearStats(y) {
+    var total = 0, clear = 0, meetings = 0, active = 0, pre = y + "-";
+    for (var k in db.days) {
+      if (k.indexOf(pre) === 0) {
+        var e = db.days[k];
+        if (typeof e.drinks === "number") { total += e.drinks; if (e.drinks === 0) clear++; }
+        if (e.meeting === true) meetings++;
+        if (e.exercise === true) active++;
+      }
+    }
+    var now = new Date(), daysElapsed;
+    if (y < now.getFullYear()) daysElapsed = ((y % 4 === 0 && y % 100 !== 0) || y % 400 === 0) ? 366 : 365;
+    else if (y > now.getFullYear()) daysElapsed = 0;
+    else daysElapsed = daysSince(y + "-01-01") + 1;
+    var weeks = daysElapsed / 7;
+    return { total: total, clear: clear, meetings: meetings, active: active, avg: weeks > 0 ? total / weeks : 0 };
+  }
+  function drinksThisWeek() {
+    var now = new Date();
+    var start = new Date(now); start.setDate(now.getDate() - now.getDay()); // Sunday
+    var sum = 0;
+    for (var i = 0; i <= now.getDay(); i++) {
+      var d = new Date(start); d.setDate(start.getDate() + i);
+      var e = db.days[keyOf(d)];
+      if (e && typeof e.drinks === "number") sum += e.drinks;
+    }
+    return sum;
+  }
+
+  // ---------- Hero: clear count, plant, milestone, commit ----------
+  var MEETINGS = [
+    { name: "SMART Recovery", who: "Steven Rossetti · online", url: "https://24hourrecovery.org/?language=English&facilitator=658" },
+    { name: "SMART Recovery", who: "Joe Gerstein · online", url: "https://24hourrecovery.org/?language=English&facilitator=87" },
+    { name: "Women for Sobriety", who: "Online meetings", url: "https://meetings.womenforsobriety.org/meetings/" }
+  ];
+
+  function nextMilestone(cd) {
+    for (var i = 0; i < MILESTONES.length; i++) { if (MILESTONES[i].d > cd) return MILESTONES[i]; }
+    return null;
+  }
+
+  function renderHero() {
+    var cd = clearDays();
+    document.getElementById("heroLabel").textContent = "Clear";
+    document.getElementById("heroNum").textContent = cd;
+    document.getElementById("heroUnit").textContent = cd === 1 ? "day" : "days";
+    var ss = db.startDate || streakStartKey();
+    document.getElementById("heroSince").innerHTML = ss
+      ? ("clear since<br><span class=\"since-date\"><u>" + fmtLong(ss) + "</u></span>")
+      : "<span class=\"since-date\"><u>set your start date</u></span>";
+    document.getElementById("heroPlant").innerHTML = plantSVG(cd);
+    var nm = nextMilestone(cd);
+    var line;
+    if (nm) { var n = nm.d - cd; line = n + (n === 1 ? " day" : " days") + " until your " + nm.short + " milestone"; }
+    else line = "Your forest is thriving.";
+    document.getElementById("heroMilestone").textContent = line;
+    renderCommit();
+    renderStats();
+  }
+
+  function renderStats() {
+    var mo = MONTHS_SHORT[vm].toUpperCase();
+    document.getElementById("mDrinks").textContent = drinksInMonth(vy, vm);
+    document.getElementById("mDrinksL").textContent = mo + " DRINKS";
+    document.getElementById("mActive").textContent = countInMonth(vy, vm, "exercise");
+    document.getElementById("mActiveL").textContent = mo + " ACTIVE";
+    document.getElementById("mMeet").textContent = countInMonth(vy, vm, "meeting");
+    document.getElementById("mMeetL").textContent = mo + " MEETINGS";
+  }
+
+  function renderCommit() {
+    var committed = db.commitDate === todayKey();
+    document.getElementById("commitBox").className = "commit-box" + (committed ? " on" : "");
+    document.getElementById("commitBox").textContent = committed ? "\u2713" : "";
+    document.getElementById("commitText").textContent = committed ? "Clear day committed" : "Commit to a clear day";
+  }
+
+  function renderMeetings() {
+    var html = MEETINGS.map(function (m) {
+      return '<a class="mtg" href="' + m.url + '" target="_blank" rel="noopener">' +
+        '<span><div class="m-name">' + m.name + '</div><div class="m-who">' + m.who + '</div></span>' +
+        '<span class="m-go">Open \u2197</span></a>';
+    }).join("");
+    document.getElementById("meetingsList").innerHTML = html;
+    document.getElementById("meetingsListSettings").innerHTML = html;
+  }
+
+  // ---------- Plant ----------
+  var P = {
+    green: "#3f8f7a", green2: "#4fa387", green3: "#66b39c", green4: "#7cc3aa",
+    stem: "#3f8f7a", trunk: "#5a4750", soil: "#5b4a63", soilTop: "#6d5c74",
+    seed: "#d9c7a0", root: "#b9a6c0",
+    blossom: "#d9a8c4", blossom2: "#b56a97", pollen: "#f0d9a8",
+    fruit: "#7a315c", bird: "#8fa6bf", birdWing: "#4f6977", star: "#f2e6b8"
+  };
+  function svgWrap(inner) { return '<svg viewBox="0 0 140 150" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Your growth">' + inner + '</svg>'; }
+  function soilMound() { return '<ellipse cx="70" cy="127" rx="50" ry="15" fill="' + P.soil + '"/><ellipse cx="70" cy="123" rx="50" ry="11" fill="' + P.soilTop + '"/>'; }
+  function soilBlock() {
+    return '<path d="M20 98 h100 a6 6 0 0 1 6 6 v30 a6 6 0 0 1 -6 6 h-100 a6 6 0 0 1 -6 -6 v-30 a6 6 0 0 1 6 -6 z" fill="' + P.soil + '" opacity="0.92"/>' +
+      '<line x1="14" y1="100" x2="126" y2="100" stroke="' + P.soilTop + '" stroke-width="1.5" stroke-dasharray="4 3"/>';
+  }
+  function trunk(topY, w) {
+    w = w || 6; var h = w / 2;
+    return '<path d="M' + (70 - h - 2) + ' 126 C' + (70 - h) + ' 110 ' + (70 - 2) + ' ' + (topY + 8) + ' 70 ' + topY +
+      ' C' + (70 + 2) + ' ' + (topY + 8) + ' ' + (70 + h) + ' 110 ' + (70 + h + 2) + ' 126 Z" fill="' + P.trunk + '"/>';
+  }
+  function canopy(cx, cy, r) {
+    var w = r * 1.18;
+    return '<g>' +
+      '<circle cx="' + (cx - w * 0.72) + '" cy="' + (cy + r * 0.02) + '" r="' + (r * 0.56) + '" fill="' + P.green3 + '"/>' +
+      '<circle cx="' + (cx + w * 0.72) + '" cy="' + (cy + r * 0.02) + '" r="' + (r * 0.56) + '" fill="' + P.green4 + '"/>' +
+      '<circle cx="' + (cx - w * 0.6) + '" cy="' + (cy + r * 0.3) + '" r="' + (r * 0.66) + '" fill="' + P.green + '"/>' +
+      '<circle cx="' + (cx + w * 0.6) + '" cy="' + (cy + r * 0.3) + '" r="' + (r * 0.66) + '" fill="' + P.green + '"/>' +
+      '<circle cx="' + cx + '" cy="' + (cy - r * 0.36) + '" r="' + (r * 0.78) + '" fill="' + P.green2 + '"/>' +
+      '<circle cx="' + (cx - w * 0.34) + '" cy="' + (cy - r * 0.06) + '" r="' + (r * 0.6) + '" fill="' + P.green3 + '"/>' +
+      '<circle cx="' + (cx + w * 0.34) + '" cy="' + (cy - r * 0.06) + '" r="' + (r * 0.6) + '" fill="' + P.green4 + '"/>' +
+      '<circle cx="' + cx + '" cy="' + (cy + r * 0.12) + '" r="' + (r * 0.66) + '" fill="' + P.green2 + '"/>' +
+      '</g>';
+  }
+  function leaf(x, y, dir) { return '<path d="M' + x + ' ' + y + ' q' + (dir * 15) + ' -5 ' + (dir * 19) + ' 6 q' + (-dir * 15) + ' 3 ' + (-dir * 19) + ' -6 z" fill="' + P.green2 + '"/>'; }
+  function blossomsAround(cx, cy, r, n) {
+    var pos = [[-0.5, -0.35], [0.55, -0.4], [0, -0.62], [0.72, -0.02], [-0.72, -0.02], [0.26, -0.12], [-0.3, 0.08], [0.42, 0.24], [-0.55, 0.26], [0.1, 0.34], [-0.15, -0.15], [0.62, 0.4]];
+    var s = "";
+    for (var i = 0; i < n && i < pos.length; i++) {
+      var bx = (cx + pos[i][0] * r * 1.05).toFixed(1), by = (cy + pos[i][1] * r).toFixed(1);
+      s += '<circle cx="' + bx + '" cy="' + by + '" r="3" fill="' + P.blossom + '"/><circle cx="' + bx + '" cy="' + by + '" r="1" fill="' + P.pollen + '"/>';
+    }
+    return s;
+  }
+  function fruitAround(cx, cy, r, n) {
+    var pos = [[-0.36, 0.18], [0.4, -0.02], [0.06, 0.32], [-0.12, -0.06], [0.56, 0.26]];
+    var s = "";
+    for (var i = 0; i < n && i < pos.length; i++) {
+      var bx = (cx + pos[i][0] * r).toFixed(1), by = (cy + pos[i][1] * r).toFixed(1);
+      s += '<circle cx="' + bx + '" cy="' + by + '" r="3.3" fill="' + P.fruit + '"/>';
+    }
+    return s;
+  }
+  function blossoms(pts) {
+    var s = "";
+    for (var i = 0; i < pts.length; i++) { s += '<circle cx="' + pts[i][0] + '" cy="' + pts[i][1] + '" r="' + (pts[i][2] || 3) + '" fill="' + P.blossom + '"/><circle cx="' + pts[i][0] + '" cy="' + pts[i][1] + '" r="1" fill="' + P.pollen + '"/>'; }
+    return s;
+  }
+  function bird(x, y) {
+    return '<g transform="translate(' + x + ',' + y + ')"><ellipse cx="0" cy="0" rx="7" ry="4.5" fill="' + P.bird + '"/><circle cx="6" cy="-2" r="3" fill="' + P.bird + '"/><path d="M-2 -1 q-4 -4 -8 -1 q4 2 8 1z" fill="' + P.birdWing + '"/><path d="M8 -2 l3 -1 -2 2z" fill="' + P.pollen + '"/><circle cx="7" cy="-3" r="0.8" fill="#1e2528"/></g>';
+  }
+  function nest(x, y) {
+    return '<g transform="translate(' + x + ',' + y + ')"><path d="M-8 0 a8 5 0 0 0 16 0 z" fill="#6b5544"/><path d="M-8 0 a8 4 0 0 1 16 0" fill="none" stroke="#7d654f" stroke-width="1.5"/><circle cx="-2.5" cy="-1" r="2" fill="#dfe7ea"/><circle cx="2.5" cy="-1" r="2" fill="#dfe7ea"/></g>';
+  }
+  function flower(x, y) {
+    return '<g transform="translate(' + x + ',' + y + ')"><line x1="0" y1="0" x2="0" y2="-8" stroke="' + P.green + '" stroke-width="1.4"/><circle cx="0" cy="-9" r="2.6" fill="' + P.blossom + '"/><circle cx="0" cy="-9" r="1" fill="' + P.pollen + '"/></g>';
+  }
+  function forestTree(tx, s, cy, r, topY, w, bloom, fruit) {
+    var dx = (tx - 70 * s).toFixed(1), dy = (126 - 126 * s).toFixed(1);
+    var inner = trunk(topY, w) + canopy(70, cy, r);
+    if (bloom) inner += blossomsAround(70, cy, r, bloom);
+    if (fruit) inner += fruitAround(70, cy, r, fruit);
+    return '<g transform="translate(' + dx + ' ' + dy + ') scale(' + s + ')">' + inner + '</g>';
+  }
+  function mushroom(x, y) {
+    return '<g><ellipse cx="' + x + '" cy="' + y + '" rx="6" ry="3.5" fill="#c98fae"/><rect x="' + (x - 2) + '" y="' + (y) + '" width="4" height="6" rx="2" fill="#e7d6c2"/></g>';
+  }
+  function star(x, y, s) { s = s || 3; return '<path d="M' + x + ' ' + (y - s) + ' l' + (s * 0.4) + ' ' + (s * 0.7) + ' ' + (s * 0.8) + ' ' + (s * 0.3) + ' -' + (s * 0.6) + ' ' + (s * 0.6) + ' ' + (s * 0.15) + ' ' + (s * 0.85) + ' -' + (s * 0.75) + ' -' + (s * 0.45) + ' -' + (s * 0.75) + ' ' + (s * 0.45) + ' ' + (s * 0.15) + ' -' + (s * 0.85) + ' -' + (s * 0.6) + ' -' + (s * 0.6) + ' ' + (s * 0.8) + ' -' + (s * 0.3) + ' z" fill="' + P.star + '"/>'; }
+
+  function plantStage(d) {
+    if (d < 3) return 0; if (d < 7) return 1; if (d < 14) return 2; if (d < 30) return 3;
+    if (d < 60) return 4; if (d < 90) return 5; if (d < 100) return 6; if (d < 180) return 7;
+    if (d < 270) return 8; if (d < 365) return 9; if (d < 547) return 10; if (d < 730) return 11;
+    if (d < 1095) return 12; if (d < 1825) return 13; return 14;
+  }
+  function plantSVG(days) {
+    var st = plantStage(days), c = "";
+    if (st <= 1) {
+      c += soilBlock();
+      if (st === 0) {
+        c += '<ellipse cx="70" cy="118" rx="7" ry="9" fill="' + P.seed + '"/><path d="M70 111 q3 4 0 8" stroke="#b8a67e" stroke-width="1.2" fill="none"/>';
+        c += star(70, 104, 3);
+      } else {
+        c += '<ellipse cx="70" cy="112" rx="6" ry="7.5" fill="' + P.seed + '"/>';
+        c += '<path d="M70 119 q-3 8 -7 15 M70 119 q1 9 5 14 M70 119 q0 9 -1 13" stroke="' + P.root + '" stroke-width="1.6" fill="none" stroke-linecap="round"/>';
+        c += '<path d="M70 108 q1 -5 3 -7" stroke="' + P.green + '" stroke-width="2" fill="none" stroke-linecap="round"/>';
+      }
+      return svgWrap(c);
+    }
+    c += soilMound();
+    if (st === 2) {
+      c += '<path d="M70 123 C70 108 69 96 71 86" stroke="' + P.stem + '" stroke-width="3.4" fill="none" stroke-linecap="round"/>';
+      c += '<path d="M71 86 q9 -4 12 3 q-9 3 -12 -3 z" fill="' + P.green2 + '"/>';
+    } else if (st === 3) {
+      c += '<path d="M70 123 V84" stroke="' + P.stem + '" stroke-width="3.4" fill="none" stroke-linecap="round"/>';
+      c += leaf(70, 100, -1) + leaf(70, 92, 1) + '<circle cx="70" cy="83" r="3" fill="' + P.green3 + '"/>';
+    } else if (st === 4) {
+      c += '<path d="M70 124 V72" stroke="' + P.stem + '" stroke-width="3.6" fill="none" stroke-linecap="round"/>';
+      c += leaf(70, 104, -1) + leaf(70, 96, 1) + leaf(70, 88, -1) + leaf(70, 80, 1) + '<circle cx="70" cy="71" r="3.5" fill="' + P.green3 + '"/>';
+    } else if (st === 5) {
+      c += '<path d="M70 124 V66" stroke="' + P.stem + '" stroke-width="4.2" fill="none" stroke-linecap="round"/>';
+      c += '<path d="M70 92 q-14 -2 -20 -12 M70 84 q14 -2 20 -12" stroke="' + P.stem + '" stroke-width="3" fill="none" stroke-linecap="round"/>';
+      c += leaf(50, 80, -1) + leaf(90, 72, 1) + leaf(70, 74, 1) + leaf(70, 82, -1) + '<circle cx="70" cy="64" r="4" fill="' + P.green3 + '"/>';
+    } else if (st === 6) {
+      c += trunk(80, 7) + canopy(70, 74, 20);
+    } else if (st === 7) {
+      c += trunk(76, 8) + canopy(70, 70, 24) + blossomsAround(70, 70, 24, 1).replace(P.blossom, P.blossom2);
+    } else if (st === 8) {
+      c += trunk(74, 9) + canopy(70, 66, 29);
+    } else if (st === 9) {
+      c += trunk(74, 10) + canopy(70, 64, 32) + blossomsAround(70, 64, 32, 5);
+    } else if (st === 10) {
+      c += trunk(76, 11) + canopy(70, 66, 35) + blossomsAround(70, 66, 35, 8) + bird(26, 84);
+    } else if (st === 11) {
+      c += trunk(78, 12) + canopy(70, 66, 38) + blossomsAround(70, 66, 38, 11);
+    } else if (st === 12) {
+      c += trunk(78, 12) + canopy(70, 66, 38) + blossomsAround(70, 66, 38, 5) + fruitAround(70, 66, 38, 3);
+      c += nest(102, 74) + '<path d="M40 125 V113" stroke="' + P.stem + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' + leaf(40, 117, 1) + leaf(40, 113, -1);
+    } else if (st === 13) {
+      c += trunk(80, 13) + canopy(70, 66, 41) + blossomsAround(70, 66, 41, 8) + fruitAround(70, 66, 41, 2);
+      c += bird(22, 80) + bird(118, 66);
+      c += flower(40, 124) + flower(102, 124);
+      c += '<g><ellipse cx="92" cy="124" rx="6" ry="3.5" fill="#c98fae"/><rect x="90" y="121" width="4" height="6" rx="2" fill="#e7d6c2"/></g>';
+      c += star(20, 42, 4) + star(120, 36, 3);
+    } else {
+      c += forestTree(28, 0.5, 66, 40, 78, 10, 3, 0) + forestTree(112, 0.55, 66, 40, 78, 10, 3, 0);
+      c += forestTree(50, 0.58, 66, 40, 78, 11, 4, 0) + forestTree(92, 0.62, 66, 40, 78, 11, 4, 0);
+      c += forestTree(70, 0.9, 66, 40, 78, 13, 9, 2);
+      c += bird(16, 66) + bird(126, 58) + bird(70, 22);
+      c += flower(40, 125) + flower(100, 125) + flower(60, 126) + flower(82, 126);
+      c += mushroom(24, 124) + mushroom(116, 124);
+      c += star(14, 38, 4) + star(126, 32, 3) + star(38, 22, 3) + star(104, 20, 3);
+    }
+    return svgWrap(c);
+  }
+
+  // ---------- Goal dates ----------
+  function renderGoals() {
+    var wrap = document.getElementById("goalsScroll");
+    wrap.innerHTML = "";
+    var tk = todayKey();
+    var sorted = db.goals.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; });
+    var upcoming = sorted.filter(function (g) { return g.date >= tk; });
+    var past = sorted.filter(function (g) { return g.date < tk; }).reverse();
+
+    if (!db.goals.length) {
+      var empty = document.createElement("div");
+      empty.className = "goals-empty";
+      empty.textContent = "No dates yet. Add one you want to reach clear.";
+      wrap.appendChild(empty);
+    }
+
+    upcoming.forEach(function (g) {
+      var days = Math.round((parseKey(g.date) - parseKey(tk)) / 86400000);
+      var c = document.createElement("div");
+      c.className = "goal-card";
+      c.innerHTML = '<div class="g-count">' + (days === 0 ? "Today" : days) + (days === 0 ? "" : '<small> ' + (days === 1 ? "day" : "days") + '</small>') + '</div>' +
+        '<div class="g-label">' + esc(g.label) + '</div>' +
+        '<div class="g-date">' + fmtDate(g.date) + '</div>';
+      c.addEventListener("click", function () { openSheet(g.date); });
+      wrap.appendChild(c);
+    });
+
+    past.slice(0, 4).forEach(function (g) {
+      var win = isClear(g.date), slip = isLogged(g.date) && !win;
+      var c = document.createElement("div");
+      c.className = "goal-card past" + (win ? " win" : slip ? " slip" : "");
+      var status = win ? "Clear ✓" : slip ? (db.days[g.date].drinks + " logged") : "Not logged";
+      c.innerHTML = '<div class="g-count">' + status + '</div>' +
+        '<div class="g-label">' + esc(g.label) + '</div>' +
+        '<div class="g-date">' + fmtDate(g.date) + '</div>';
+      c.addEventListener("click", function () { openSheet(g.date); });
+      wrap.appendChild(c);
+    });
+
+    var add = document.createElement("div");
+    add.className = "goal-add";
+    add.innerHTML = '<span class="plus">+</span>Add date';
+    add.addEventListener("click", openGoalModal);
+    wrap.appendChild(add);
+  }
+  function fmtDate(k) { var d = parseKey(k); return MONTHS_SHORT[d.getMonth()] + " " + d.getDate(); }
+  function esc(s) { return (s || "").replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  // ---------- Month view ----------
+  function renderMonth() {
+    document.getElementById("calPeriod").textContent = MONTHS[vm] + " " + vy;
+    var grid = document.getElementById("mgrid");
+    grid.innerHTML = "";
+    var first = new Date(vy, vm, 1).getDay();
+    var dim = new Date(vy, vm + 1, 0).getDate();
+    var tk = todayKey();
+    for (var i = 0; i < first; i++) { var e = document.createElement("div"); e.className = "mcell empty"; grid.appendChild(e); }
+    for (var d = 1; d <= dim; d++) {
+      var dt = new Date(vy, vm, d), k = keyOf(dt);
+      var entry = db.days[k];
+      var future = k > tk;
+      var cell = document.createElement("div");
+      var cls = "mcell";
+      if (entry && typeof entry.drinks === "number") cls += " " + tierClass(entry.drinks);
+      if (k === tk) cls += " today";
+      if (future) cls += " future";
+      cell.className = cls;
+      var html = '<div class="dnum">' + d + "</div>";
+      if (entry && typeof entry.drinks === "number") html += '<div class="dmark">' + markText(entry.drinks) + "</div>";
+      cell.innerHTML = html;
+      if (entry && (entry.exercise || entry.meeting)) {
+        var fl = document.createElement("div"); fl.className = "flags";
+        if (entry.exercise) { var a = document.createElement("span"); a.className = "flag ex"; fl.appendChild(a); }
+        if (entry.meeting) { var b = document.createElement("span"); b.className = "flag mt"; fl.appendChild(b); }
+        cell.appendChild(fl);
+      }
+      if (!future) (function (key) { cell.addEventListener("click", function () { openSheet(key); }); })(k);
+      grid.appendChild(cell);
+    }
+  }
+
+  // ---------- Year view ----------
+  function renderYear() {
+    document.getElementById("calPeriod").textContent = "" + vy;
+    var ys = yearStats(vy);
+    document.getElementById("yearStats").innerHTML =
+      '<div class="mini-stat"><b>' + ys.total + '</b><small>DRINKS ' + vy + '</small></div>' +
+      '<div class="mini-stat"><b>' + ys.avg.toFixed(1) + '</b><small>AVG / WEEK</small></div>' +
+      '<div class="mini-stat"><b>' + ys.clear + '</b><small>CLEAR DAYS</small></div>' +
+      '<div class="mini-stat"><b>' + ys.active + '</b><small>ACTIVE DAYS</small></div>' +
+      '<div class="mini-stat"><b>' + ys.meetings + '</b><small>MEETINGS</small></div>';
+    var grid = document.getElementById("ygrid");
+    grid.innerHTML = "";
+    var tk = todayKey();
+    for (var m = 0; m < 12; m++) {
+      var box = document.createElement("div");
+      box.className = "ymonth";
+      box.innerHTML = "<h4>" + MONTHS[m] + "</h4>" +
+        '<div class="ydow"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>' +
+        '<div class="ycells"></div>';
+      var cells = box.querySelector(".ycells");
+      var first = new Date(vy, m, 1).getDay();
+      var dim = new Date(vy, m + 1, 0).getDate();
+      var rows = Math.ceil((first + dim) / 7);
+      var len = rows * 7;
+      // vals[i] = day number for real days, null for padding cells
+      var vals = [];
+      for (var i = 0; i < len; i++) {
+        if (i < first || i >= first + dim) vals.push(null);
+        else vals.push(i - first + 1);
+      }
+      function real(idx) { return idx >= 0 && idx < len && vals[idx] !== null; }
+      for (var j = 0; j < len; j++) {
+        var cell = document.createElement("div");
+        if (vals[j] === null) { cell.className = "ycell pad"; cells.appendChild(cell); continue; }
+        var day = vals[j];
+        var k = keyOf(new Date(vy, m, day));
+        var entry = db.days[k];
+        var future = k > tk;
+        var mark = "";
+        var cls = ["ycell"];
+        if (entry && typeof entry.drinks === "number") { cls.push(tierClass(entry.drinks)); if (entry.drinks >= 1) mark = markText(entry.drinks); }
+        if (future) cls.push("future");
+        if (k === tk) cls.push("today");
+        var col = j % 7;
+        if (!real(j - 7)) cls.push("eT");
+        if (!real(j + 7)) cls.push("eB");
+        if (col === 0 || !real(j - 1)) cls.push("eL");
+        if (col === 6 || !real(j + 1)) cls.push("eR");
+        cell.className = cls.join(" ");
+        if (mark) cell.innerHTML = '<span class="ynum">' + mark + '</span>';
+        if (!future) (function (key) { cell.addEventListener("click", function () { openSheet(key); }); })(k);
+        cells.appendChild(cell);
+      }
+      grid.appendChild(box);
+    }
+  }
+
+  function renderCalendar() {
+    if (mode === "month") { document.getElementById("monthView").style.display = ""; document.getElementById("yearView").style.display = "none"; renderMonth(); }
+    else { document.getElementById("monthView").style.display = "none"; document.getElementById("yearView").style.display = ""; renderYear(); }
+    document.getElementById("msSection").style.display = (mode === "year") ? "none" : "";
+    renderStats();
+  }
+
+  // ---------- Milestones ----------
+  var MILESTONES = [
+    { d: 1, short: "first", name: "First day", meaning: "Choosing to begin", ico: "🌱" },
+    { d: 3, short: "3-day", name: "3 days", meaning: "Change has started underground", ico: "🌱" },
+    { d: 7, short: "1-week", name: "1 week", meaning: "A shoot breaks through", ico: "🌿" },
+    { d: 14, short: "2-week", name: "2 weeks", meaning: "A new pattern is opening", ico: "🌿" },
+    { d: 30, short: "1-month", name: "1 month", meaning: "Building stability", ico: "🌾" },
+    { d: 60, short: "2-month", name: "2 months", meaning: "Developing capacity", ico: "🌿" },
+    { d: 90, short: "3-month", name: "3 months", meaning: "Becoming established", ico: "🌳" },
+    { d: 100, short: "100-day", name: "100 days", meaning: "A distinct achievement", ico: "🌳" },
+    { d: 180, short: "6-month", name: "6 months", meaning: "Strength and resilience", ico: "🌳" },
+    { d: 270, short: "9-month", name: "9 months", meaning: "Approaching a full cycle", ico: "🌸" },
+    { d: 365, short: "1-year", name: "1 year", meaning: "Growth that supports life", ico: "🌸" },
+    { d: 547, short: "18-month", name: "18 months", meaning: "Fuller bloom", ico: "🌸" },
+    { d: 730, short: "2-year", name: "2 years", meaning: "Fruit and new life nearby", ico: "🍎" },
+    { d: 1095, short: "3-year", name: "3 years", meaning: "A whole small ecosystem", ico: "🌳" },
+    { d: 1825, short: "5-year", name: "5 years", meaning: "A grove that shelters others", ico: "🌲" }
+  ];
+  function renderMilestones() {
+    var cd = clearDays();
+    var earned = Math.max(cd, longestStreak());
+    var nm = nextMilestone(cd);
+    var nextBox = document.getElementById("msNext");
+    if (nm) {
+      var prevD = 0;
+      for (var j = 0; j < MILESTONES.length; j++) { if (MILESTONES[j].d <= cd) prevD = MILESTONES[j].d; }
+      var span = nm.d - prevD, into = cd - prevD;
+      var pct = Math.max(4, Math.round((into / span) * 100));
+      var left = nm.d - cd;
+      nextBox.innerHTML =
+        '<div class="ms-top"><span>Next milestone</span><b>' + nm.ico + " " + nm.name + '</b></div>' +
+        '<div class="ms-bar"><i style="width:' + pct + '%"></i></div>' +
+        '<div class="ms-sub">' + left + (left === 1 ? " clear day to go · " : " clear days to go · ") + nm.meaning + '</div>';
+    } else {
+      nextBox.innerHTML = '<div class="ms-top"><span>Every milestone reached</span><b>🌲 5 years+</b></div>' +
+        '<div class="ms-sub">Your forest is thriving.</div>';
+    }
+    var wrap = document.getElementById("badges");
+    wrap.innerHTML = "";
+    var earnedList = MILESTONES.filter(function (m) { return earned >= m.d; });
+    if (earnedList.length === 0) {
+      wrap.innerHTML = '<div class="ms-empty">No milestones yet. Your first is one clear day away.</div>';
+    } else {
+      earnedList.forEach(function (m) { wrap.appendChild(badgeEl(m, true)); });
+    }
+    var all = document.getElementById("badgesAll");
+    all.innerHTML = "";
+    MILESTONES.forEach(function (m) { all.appendChild(badgeEl(m, earned >= m.d)); });
+  }
+  function badgeEl(m, on) {
+    var b = document.createElement("div");
+    b.className = "badge" + (on ? " earned" : "");
+    b.innerHTML = '<div class="b-ico">' + m.ico + '</div><div class="b-name">' + m.name + '</div><div class="b-days">' + m.d + (m.d === 1 ? " day" : " days") + '</div>';
+    return b;
+  }
+
+  // ---------- Entry sheet ----------
+  var curKey = null, draft = null;
+
+  function blankDraft() { return { drinks: null, exercise: null, meeting: null, mood: null, note: "" }; }
+
+  function buildChips() {
+    var wrap = document.getElementById("drinkChips");
+    wrap.innerHTML = "";
+    var opts = [
+      { v: 0, label: "\u2726 0", tier: "0", zero: true },
+      { v: 1, label: "1", tier: "12" }, { v: 2, label: "2", tier: "12" },
+      { v: 3, label: "3", tier: "34" }, { v: 4, label: "4", tier: "34" },
+      { v: 5, label: "5", tier: "56" }, { v: 6, label: "6", tier: "56" },
+      { v: 7, label: "7+", tier: "7" }
+    ];
+    opts.forEach(function (o) {
+      var c = document.createElement("button");
+      c.className = "chip" + (o.zero ? " zero" : "");
+      c.setAttribute("data-val", o.v);
+      c.setAttribute("data-tier", o.tier);
+      c.textContent = o.label;
+      c.addEventListener("click", function () {
+        draft.drinks = o.v;
+        document.querySelectorAll("#drinkChips .chip").forEach(function (x) { x.classList.remove("sel"); });
+        c.classList.add("sel");
+        refreshSaveBtn();
+      });
+      wrap.appendChild(c);
+    });
+  }
+
+  function buildMoods() {
+    var wrap = document.getElementById("moods");
+    wrap.innerHTML = "";
+    var faces = ["😔", "🙁", "😐", "🙂", "😄"];
+    faces.forEach(function (f, i) {
+      var el = document.createElement("button");
+      el.className = "mood"; el.textContent = f; el.setAttribute("data-mood", i + 1);
+      el.addEventListener("click", function () {
+        draft.mood = (draft.mood === i + 1) ? null : i + 1;
+        syncMoods();
+      });
+      wrap.appendChild(el);
+    });
+  }
+  function syncMoods() {
+    document.querySelectorAll("#moods .mood").forEach(function (el) {
+      el.classList.toggle("on", +el.getAttribute("data-mood") === draft.mood);
+    });
+  }
+  function syncToggles() {
+    document.getElementById("exYes").classList.toggle("on", draft.exercise === true);
+    document.getElementById("exNo").classList.toggle("on", draft.exercise === false);
+    document.getElementById("mtYes").classList.toggle("on", draft.meeting === true);
+    document.getElementById("mtNo").classList.toggle("on", draft.meeting === false);
+  }
+  function syncChips() {
+    document.querySelectorAll("#drinkChips .chip").forEach(function (x) {
+      x.classList.toggle("sel", draft.drinks !== null && +x.getAttribute("data-val") === draft.drinks);
+    });
+  }
+  function refreshSaveBtn() {
+    var btn = document.getElementById("saveDay");
+    btn.disabled = draft.drinks === null;
+    btn.textContent = draft.drinks === 0 ? "Log clear day \u2726" : "Log day";
+  }
+
+  function openSheet(k) {
+    curKey = k;
+    var existing = db.days[k];
+    draft = existing ? { drinks: existing.drinks, exercise: existing.exercise == null ? null : existing.exercise, meeting: existing.meeting == null ? null : existing.meeting, mood: existing.mood || null, note: existing.note || "" } : blankDraft();
+    var d = parseKey(k);
+    var weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][d.getDay()];
+    document.getElementById("sheetTitle").textContent = existing ? "Edit day" : "Log a day";
+    document.getElementById("sheetDate").textContent = weekday + ", " + MONTHS[d.getMonth()] + " " + d.getDate() + ", " + d.getFullYear();
+    document.getElementById("note").value = draft.note;
+    document.getElementById("clearDay").style.display = existing ? "" : "none";
+    syncChips(); syncToggles(); syncMoods(); refreshSaveBtn();
+    document.getElementById("overlay").classList.add("on");
+    document.getElementById("sheet").classList.add("on");
+  }
+  function closeSheet() {
+    document.getElementById("overlay").classList.remove("on");
+    document.getElementById("sheet").classList.remove("on");
+    curKey = null;
+  }
+
+  document.getElementById("exYes").addEventListener("click", function () { draft.exercise = draft.exercise === true ? null : true; syncToggles(); });
+  document.getElementById("exNo").addEventListener("click", function () { draft.exercise = draft.exercise === false ? null : false; syncToggles(); });
+  document.getElementById("mtYes").addEventListener("click", function () { draft.meeting = draft.meeting === true ? null : true; syncToggles(); });
+  document.getElementById("mtNo").addEventListener("click", function () { draft.meeting = draft.meeting === false ? null : false; syncToggles(); });
+
+  document.getElementById("saveDay").addEventListener("click", function () {
+    if (draft.drinks === null || !curKey) return;
+    draft.note = document.getElementById("note").value.trim();
+    db.days[curKey] = { drinks: draft.drinks, exercise: draft.exercise, meeting: draft.meeting, mood: draft.mood, note: draft.note };
+    save();
+    var dry = draft.drinks === 0;
+    closeSheet();
+    renderAll();
+    toast(dry ? "\u2726 Clear day logged. Nice work." : "Logged " + (draft.drinks >= 7 ? "7+" : draft.drinks) + " drink" + (draft.drinks === 1 ? "" : "s"), dry);
+  });
+
+  document.getElementById("clearDay").addEventListener("click", function () {
+    if (curKey && db.days[curKey]) { delete db.days[curKey]; save(); }
+    closeSheet(); renderAll(); toast("Day cleared", false);
+  });
+
+  document.getElementById("overlay").addEventListener("click", closeSheet);
+
+  // ---------- Goal modal ----------
+  function openGoalModal() {
+    renderGoalList();
+    document.getElementById("gLabel").value = "";
+    document.getElementById("gDate").value = "";
+    document.getElementById("gOverlay").classList.add("on");
+    document.getElementById("gSheet").classList.add("on");
+  }
+  function closeGoalModal() {
+    document.getElementById("gOverlay").classList.remove("on");
+    document.getElementById("gSheet").classList.remove("on");
+  }
+  function renderGoalList() {
+    var list = document.getElementById("gList");
+    list.innerHTML = "";
+    if (!db.goals.length) { list.innerHTML = '<div class="goals-empty">Nothing here yet.</div>'; return; }
+    db.goals.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; }).forEach(function (g) {
+      var row = document.createElement("div");
+      row.className = "grow";
+      row.innerHTML = '<div class="gl-info"><b>' + esc(g.label) + '</b><small>' + fmtDate(g.date) + ", " + parseKey(g.date).getFullYear() + '</small></div>';
+      var del = document.createElement("button");
+      del.className = "gl-del"; del.textContent = "Remove";
+      del.addEventListener("click", function () { db.goals = db.goals.filter(function (x) { return x.id !== g.id; }); save(); renderGoalList(); renderGoals(); });
+      row.appendChild(del);
+      list.appendChild(row);
+    });
+  }
+  document.getElementById("gAdd").addEventListener("click", function () {
+    var label = document.getElementById("gLabel").value.trim();
+    var date = document.getElementById("gDate").value;
+    if (!label) { toast("Add a name for the date", false); return; }
+    if (!date) { toast("Pick a date", false); return; }
+    db.goals.push({ id: Date.now() + "" + Math.floor(Math.random() * 999), label: label, date: date });
+    save();
+    document.getElementById("gLabel").value = "";
+    document.getElementById("gDate").value = "";
+    renderGoalList(); renderGoals();
+    toast("Date added", false);
+  });
+  document.getElementById("gClose").addEventListener("click", closeGoalModal);
+  document.getElementById("gOverlay").addEventListener("click", closeGoalModal);
+  document.getElementById("manageGoals").addEventListener("click", openGoalModal);
+
+  // ---------- Settings ----------
+  function openSettings() {
+    document.getElementById("sOverlay").classList.add("on");
+    document.getElementById("sSheet").classList.add("on");
+  }
+  function closeSettings() {
+    document.getElementById("sOverlay").classList.remove("on");
+    document.getElementById("sSheet").classList.remove("on");
+  }
+  document.getElementById("openSettings").addEventListener("click", openSettings);
+  document.getElementById("heroSince").addEventListener("click", openStartDate);
+
+  function openStartDate() {
+    var inp = document.getElementById("startDateInput");
+    inp.max = todayKey();
+    inp.value = db.startDate || "";
+    document.getElementById("startHint").textContent = db.startDate ? (Math.max(0, daysSince(db.startDate)) + " days clear") : "Using your logged streak";
+    document.getElementById("dOverlay").classList.add("on");
+    document.getElementById("dSheet").classList.add("on");
+  }
+  function closeStartDate() {
+    document.getElementById("dOverlay").classList.remove("on");
+    document.getElementById("dSheet").classList.remove("on");
+  }
+  document.getElementById("closeStart").addEventListener("click", closeStartDate);
+  document.getElementById("dOverlay").addEventListener("click", closeStartDate);
+  document.getElementById("startDateInput").addEventListener("change", function () {
+    db.startDate = this.value || null;
+    save();
+    document.getElementById("startHint").textContent = db.startDate ? (Math.max(0, daysSince(db.startDate)) + " days clear") : "Using your logged streak";
+    renderHero(); renderMilestones();
+  });
+  document.getElementById("clearStart").addEventListener("click", function () {
+    db.startDate = null; save();
+    document.getElementById("startDateInput").value = "";
+    document.getElementById("startHint").textContent = "Using your logged streak";
+    renderHero(); renderMilestones();
+  });
+  document.getElementById("closeSettings").addEventListener("click", closeSettings);
+  document.getElementById("sOverlay").addEventListener("click", closeSettings);
+
+  // ---------- Commit + meeting link ----------
+  document.getElementById("commitBtn").addEventListener("click", function () {
+    var committed = db.commitDate === todayKey();
+    db.commitDate = committed ? null : todayKey();
+    save();
+    renderCommit();
+    if (db.commitDate) toast("Committed to a clear day", true);
+  });
+  document.getElementById("sheetMeetingLink").addEventListener("click", function (e) {
+    e.preventDefault();
+    closeSheet();
+    setTimeout(function () { document.getElementById("meetings").scrollIntoView({ behavior: "smooth", block: "start" }); }, 260);
+  });
+
+  // ---------- Nav + tabs ----------
+  document.getElementById("tabMonth").addEventListener("click", function () {
+    mode = "month"; this.classList.add("on"); document.getElementById("tabYear").classList.remove("on"); renderCalendar();
+  });
+  document.getElementById("tabYear").addEventListener("click", function () {
+    mode = "year"; this.classList.add("on"); document.getElementById("tabMonth").classList.remove("on"); renderCalendar();
+  });
+  document.getElementById("seeAllMs").addEventListener("click", function () {
+    mode = "year";
+    document.getElementById("tabYear").classList.add("on");
+    document.getElementById("tabMonth").classList.remove("on");
+    renderCalendar();
+    setTimeout(function () { document.getElementById("allMilestonesTitle").scrollIntoView({ behavior: "smooth", block: "start" }); }, 40);
+  });
+  document.getElementById("prevBtn").addEventListener("click", function () {
+    if (mode === "month") { vm--; if (vm < 0) { vm = 11; vy--; } } else { vy--; }
+    renderCalendar();
+  });
+  document.getElementById("nextBtn").addEventListener("click", function () {
+    if (mode === "month") { vm++; if (vm > 11) { vm = 0; vy++; } } else { vy++; }
+    renderCalendar();
+  });
+
+  // ---------- Toast ----------
+  var toastTimer = null;
+  function toast(msg, dry) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.className = "toast show" + (dry ? " dry" : "");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.className = "toast" + (dry ? " dry" : ""); }, 2200);
+  }
+
+  // ---------- Render all ----------
+  function renderAll() { renderHero(); renderGoals(); renderCalendar(); renderMilestones(); }
+
+  renderMeetings();
+  buildChips(); buildMoods(); renderAll();
+})();
+</script>
+</body>
+</html>
