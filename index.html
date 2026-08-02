@@ -235,7 +235,7 @@
   .grow .gl-del { border: 0; background: none; color: var(--berry); font-size: 13px; cursor: pointer; font-weight: 500; }
 
   /* toast */
-  .toast { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px); background: var(--charcoal); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 13.5px; font-weight: 500; opacity: 0; pointer-events: none; transition: all 0.25s; z-index: 60; box-shadow: 0 8px 24px -8px rgba(0,0,0,0.4); }
+  .toast { position: fixed; left: 50%; bottom: 30px; transform: translateX(-50%) translateY(20px); background: var(--charcoal); color: #fff; padding: 12px 20px; border-radius: 999px; font-size: 13.5px; font-weight: 500; text-align: center; max-width: calc(100vw - 40px); opacity: 0; pointer-events: none; transition: all 0.25s; z-index: 60; box-shadow: 0 8px 24px -8px rgba(0,0,0,0.4); }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
   .toast.dry { background: var(--blue); }
 
@@ -277,7 +277,7 @@
   .mini-stat { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius-sm); padding: 11px 8px; text-align: center; }
   .mini-stat b { font-family: var(--brand); font-weight: 700; font-size: 18px; color: var(--blue-deep); display: block; }
   .mini-stat small { font-size: 10.5px; color: var(--muted); letter-spacing: 0.3px; }
-  .year-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 8px; margin-bottom: 14px; }
+  .year-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
 
   /* meetings list */
   .meetings { margin-top: 8px; }
@@ -572,13 +572,14 @@
     return n;
   }
   function yearStats(y) {
-    var total = 0, clear = 0, meetings = 0, active = 0, pre = y + "-";
+    var total = 0, clear = 0, meetings = 0, active = 0, moodSum = 0, moodN = 0, pre = y + "-";
     for (var k in db.days) {
       if (k.indexOf(pre) === 0) {
         var e = db.days[k];
         if (typeof e.drinks === "number") { total += e.drinks; if (e.drinks === 0) clear++; }
         if (e.meeting === true) meetings++;
         if (e.exercise === true) active++;
+        if (typeof e.mood === "number" && e.mood >= 1) { moodSum += e.mood; moodN++; }
       }
     }
     var now = new Date(), daysElapsed;
@@ -586,7 +587,7 @@
     else if (y > now.getFullYear()) daysElapsed = 0;
     else daysElapsed = daysSince(y + "-01-01") + 1;
     var weeks = daysElapsed / 7;
-    return { total: total, clear: clear, meetings: meetings, active: active, avg: weeks > 0 ? total / weeks : 0 };
+    return { total: total, clear: clear, meetings: meetings, active: active, avg: weeks > 0 ? total / weeks : 0, mood: moodN ? moodSum / moodN : null };
   }
   function drinksThisWeek() {
     var now = new Date();
@@ -887,7 +888,8 @@
       '<div class="mini-stat"><b>' + ys.avg.toFixed(1) + '</b><small>AVG / WEEK</small></div>' +
       '<div class="mini-stat"><b>' + ys.clear + '</b><small>CLEAR DAYS</small></div>' +
       '<div class="mini-stat"><b>' + ys.active + '</b><small>ACTIVE DAYS</small></div>' +
-      '<div class="mini-stat"><b>' + ys.meetings + '</b><small>MEETINGS</small></div>';
+      '<div class="mini-stat"><b>' + ys.meetings + '</b><small>MEETINGS</small></div>' +
+      '<div class="mini-stat"><b>' + (ys.mood != null ? ys.mood.toFixed(1) : "—") + '</b><small>AVG MOOD</small></div>';
     var grid = document.getElementById("ygrid");
     grid.innerHTML = "";
     var tk = todayKey();
