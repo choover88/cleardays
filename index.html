@@ -153,6 +153,7 @@
   .ycell { aspect-ratio: 1; background: #fff; box-sizing: border-box; border: 2px solid #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .ycell.pad { background: transparent; border: none; cursor: default; }
   .ynum { font-family: var(--sans); font-weight: 600; font-size: 9px; line-height: 1; }
+  .ycell.t-af .ynum { color: #fff; }
   .ycell.t-12 .ynum { color: #2c3b47; }
   .ycell.t-34 .ynum, .ycell.t-56 .ynum, .ycell.t-7 .ynum { color: #fff; }
   .ycell.t-af { background: var(--blue); }
@@ -448,6 +449,14 @@
 
   <div class="field-label">Find a meeting</div>
   <div class="meetings" id="meetingsListSettings"></div>
+
+  <div class="field-label">Your data</div>
+  <div class="s-date">Your entries live in this browser. Back up to keep them safe or move to another device.</div>
+  <div class="sheet-actions" style="margin-top: 10px;">
+    <button class="btn btn-primary" id="exportBtn" style="flex: 1;">Back up</button>
+    <button class="btn btn-primary" id="importBtn" style="flex: 1; background: var(--blue-deep);">Restore</button>
+  </div>
+  <input type="file" id="importFile" accept="application/json,.json" style="display: none;" />
 
   <div class="sheet-actions">
     <button class="btn btn-primary" id="closeSettings" style="flex:1;">Done</button>
@@ -920,7 +929,7 @@
         var future = k > tk;
         var mark = "";
         var cls = ["ycell"];
-        if (entry && typeof entry.drinks === "number") { cls.push(tierClass(entry.drinks)); if (entry.drinks >= 1) mark = markText(entry.drinks); }
+        if (entry && typeof entry.drinks === "number") { cls.push(tierClass(entry.drinks)); mark = markText(entry.drinks); }
         if (future) cls.push("future");
         if (k === tk) cls.push("today");
         var col = j % 7;
@@ -1193,6 +1202,43 @@
   });
   document.getElementById("closeSettings").addEventListener("click", closeSettings);
   document.getElementById("sOverlay").addEventListener("click", closeSettings);
+
+  // ---------- Backup / restore ----------
+  document.getElementById("exportBtn").addEventListener("click", function () {
+    var json = JSON.stringify(db);
+    var stamp = todayKey();
+    try {
+      var blob = new Blob([json], { type: "application/json" });
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url; a.download = "cleardays-backup-" + stamp + ".json";
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+    } catch (e) {}
+    try { if (navigator.clipboard) navigator.clipboard.writeText(json); } catch (e) {}
+    toast("Backup saved and copied", false);
+  });
+  document.getElementById("importBtn").addEventListener("click", function () {
+    document.getElementById("importFile").click();
+  });
+  document.getElementById("importFile").addEventListener("change", function () {
+    var f = this.files && this.files[0];
+    this.value = "";
+    if (!f) return;
+    var r = new FileReader();
+    r.onload = function () {
+      var p;
+      try { p = JSON.parse(r.result); } catch (e) { toast("Could not read that file", false); return; }
+      if (!p || typeof p !== "object" || !p.days) { toast("That backup didn't look right", false); return; }
+      if (!confirm("Replace your current entries with this backup?")) return;
+      db = { days: p.days || {}, goals: p.goals || [], startDate: p.startDate || null, commitDate: p.commitDate || null };
+      save();
+      renderAll();
+      closeSettings();
+      toast("Backup restored", false);
+    };
+    r.readAsText(f);
+  });
 
   // ---------- Commit + meeting link ----------
   document.getElementById("commitBtn").addEventListener("click", function () {
