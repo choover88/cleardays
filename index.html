@@ -262,6 +262,8 @@
   .meeting-link span { display: block; font-weight: 400; font-size: 12px; color: var(--muted); margin-top: 2px; }
   .meeting-link:active { background: var(--line-soft); }
   .meeting-link.small { padding: 10px 12px; font-size: 13px; margin-top: 10px; color: var(--blue); }
+  .install-steps { line-height: 1.7; }
+  .install-steps b { color: var(--charcoal); font-weight: 600; }
   /* plant hero pieces */
   .hero-plant { display: flex; justify-content: center; align-items: flex-end; margin-top: 12px; background: #fff; border-radius: 14px; padding: 10px 8px 6px; }
   .hero-plant svg { width: 128px; height: auto; display: block; }
@@ -279,6 +281,8 @@
   .mini-stat b { font-family: var(--brand); font-weight: 700; font-size: 18px; color: var(--blue-deep); display: block; }
   .mini-stat small { font-size: 10.5px; color: var(--muted); letter-spacing: 0.3px; }
   .year-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .year-headline { text-align: center; font-family: var(--brand); font-weight: 700; font-size: 16px; color: var(--blue-deep); margin-bottom: 12px; line-height: 1.3; }
+  .year-headline span { display: block; font-family: var(--sans); font-weight: 400; font-size: 12px; color: var(--muted); margin-top: 1px; }
 
   /* meetings list */
   .meetings { margin-top: 8px; }
@@ -295,6 +299,31 @@
     .hero-plant svg { width: auto; max-width: 150px; max-height: 150px; }
     .hero-side { order: 2; flex: 0 0 172px; align-self: stretch; justify-content: center; margin-top: 0; padding-left: 20px; }
   }
+  /* additions: badges as plants, commit celebration, milestone detail, journal */
+  .head-btns { display: flex; gap: 8px; flex: 0 0 auto; }
+  .badge { cursor: pointer; }
+  .b-plant { display: flex; justify-content: center; }
+  .b-plant svg { width: 52px; height: auto; display: block; }
+  .badge:not(.earned) .b-plant { filter: grayscale(0.65); }
+  .mtg-del { border: 0; background: none; color: var(--berry); font-size: 12.5px; font-weight: 500; cursor: pointer; flex: 0 0 auto; }
+  .commit.done { background: rgba(166,208,196,0.28); }
+  @keyframes pop { 0% { transform: scale(0.5); } 55% { transform: scale(1.3); } 100% { transform: scale(1); } }
+  .commit-box.pop { animation: pop 0.5s cubic-bezier(.2,.8,.2,1); }
+  .ms-detail-plant { display: flex; justify-content: center; margin: 4px 0 10px; }
+  .ms-detail-plant svg { width: 100px; height: auto; }
+  .ms-body { font-size: 14px; line-height: 1.5; color: var(--charcoal); margin: 12px 0 4px; }
+  .j-section { font-family: var(--brand); font-weight: 700; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; margin: 16px 2px 8px; }
+  .j-item { border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; margin-bottom: 8px; cursor: pointer; }
+  .j-item:active { background: var(--line-soft); }
+  .j-item.j-ms { border-color: var(--blue-light); background: linear-gradient(160deg, #fff, rgba(105,122,149,0.06)); }
+  .j-head { font-weight: 600; font-size: 13px; color: var(--charcoal); margin-bottom: 3px; }
+  .j-tag { font-weight: 400; font-size: 11px; color: var(--muted); }
+  .j-note { font-size: 13.5px; color: var(--charcoal); line-height: 1.45; white-space: pre-wrap; }
+  #journalList { max-height: 60vh; overflow-y: auto; }
+  .custom-drinks { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
+  .custom-label { font-size: 13px; color: var(--muted); font-weight: 500; }
+  #drinkCustom { flex: 1; height: 42px; border: 1px solid var(--line); border-radius: 12px; padding: 0 13px; font-family: var(--sans); font-size: 14px; color: var(--ink); background: #fdfdfd; max-width: 160px; }
+  #drinkCustom:focus { outline: none; border-color: var(--blue); }
 </style>
 </head>
 <body>
@@ -304,7 +333,10 @@
       <div class="brand">Clear<span>Days</span></div>
       <div class="head-sub">one day at a time</div>
     </div>
-    <button class="gear" id="openSettings" aria-label="Settings">⚙</button>
+    <div class="head-btns">
+      <button class="gear" id="openJournal" aria-label="Journal">📖</button>
+      <button class="gear" id="openSettings" aria-label="Settings">⚙</button>
+    </div>
   </div>
 </header>
 
@@ -338,7 +370,7 @@
   <div class="goals-scroll" id="goalsScroll"></div>
 
   <!-- Calendar -->
-  <div class="sec-title" style="margin-bottom:14px;">Calendar</div>
+  <div class="sec-title" style="margin-bottom:14px;">Calendar <span class="link" id="shareBtn">Share ↗</span></div>
   <div class="toggle">
     <button id="tabMonth" class="on">Month</button>
     <button id="tabYear">Year</button>
@@ -357,6 +389,7 @@
   </div>
 
   <div id="yearView" style="display:none;">
+    <div class="year-headline" id="yearHeadline"></div>
     <div class="year-stats" id="yearStats"></div>
     <div class="ygrid" id="ygrid"></div>
     <div class="sec-title" id="allMilestonesTitle" style="margin-top:22px;">All milestones</div>
@@ -397,6 +430,10 @@
 
   <div class="field-label">Drinks</div>
   <div class="chips" id="drinkChips"></div>
+  <div class="custom-drinks">
+    <span class="custom-label">More than 7?</span>
+    <input type="number" id="drinkCustom" inputmode="numeric" min="8" max="99" placeholder="enter a number" />
+  </div>
 
   <div class="field-label">Exercise</div>
   <div class="toggle-row">
@@ -449,6 +486,22 @@
 
   <div class="field-label">Find a meeting</div>
   <div class="meetings" id="meetingsListSettings"></div>
+  <div class="gform" style="margin-top: 8px;">
+    <input type="text" id="mtgName" placeholder="Name (e.g. SMART Recovery)" maxlength="42" />
+    <input type="text" id="mtgWho" placeholder="Detail (e.g. Tuesdays, online)" maxlength="42" />
+    <input type="url" id="mtgUrl" placeholder="https://..." />
+    <button class="btn btn-primary" id="mtgAdd" style="width: 100%;">Add meeting</button>
+  </div>
+
+  <div class="field-label">Support ClearDays</div>
+  <div class="s-date">ClearDays is free for everyone. Optional tips help support ongoing updates and development.</div>
+  <a class="meeting-link" href="https://ko-fi.com/cleardays88" target="_blank" rel="noopener">Leave a tip on Ko-fi ↗<span>Completely optional, always appreciated</span></a>
+
+  <div class="field-label">Add to your home screen</div>
+  <div class="s-date install-steps">
+    <b>iPhone (Safari):</b> tap the Share icon, then "Add to Home Screen."<br>
+    <b>Android (Chrome):</b> tap the ⋮ menu, then "Add to Home screen" or "Install app."
+  </div>
 
   <div class="field-label">Your data</div>
   <div class="s-date">Your entries live in this browser. Back up to keep them safe or move to another device.</div>
@@ -479,6 +532,34 @@
   </div>
 </div>
 
+<!-- Milestone detail sheet -->
+<div class="overlay" id="mOverlay"></div>
+<div class="sheet" id="mSheet">
+  <div class="grabber"></div>
+  <div class="ms-detail-plant" id="mPlant"></div>
+  <h3 id="mTitle"></h3>
+  <div class="s-date" id="mSub"></div>
+  <div class="ms-body" id="mBody"></div>
+  <div class="field-label">How do you feel?</div>
+  <textarea id="mNote" placeholder="A note to your future self about reaching this..."></textarea>
+  <div class="sheet-actions">
+    <button class="btn btn-ghost" id="mClose" style="width: 50px;">✕</button>
+    <button class="btn btn-primary" id="mSave">Save note</button>
+  </div>
+</div>
+
+<!-- Journal sheet -->
+<div class="overlay" id="jOverlay"></div>
+<div class="sheet" id="jSheet">
+  <div class="grabber"></div>
+  <h3>Journal</h3>
+  <div class="s-date">Your reflections and milestone notes, most recent first.</div>
+  <div id="journalList"></div>
+  <div class="sheet-actions">
+    <button class="btn btn-primary" id="jClose" style="flex: 1;">Done</button>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
@@ -486,14 +567,27 @@
   "use strict";
 
   var KEY = "cleardays_v1";
+  var DEFAULT_MEETINGS = [
+    { name: "SMART Recovery", who: "Steven Rossetti · online", url: "https://24hourrecovery.org/?language=English&facilitator=658" },
+    { name: "SMART Recovery", who: "Joe Gerstein · online", url: "https://24hourrecovery.org/?language=English&facilitator=87" },
+    { name: "SMART Recovery", who: "All online meetings", url: "https://24hourrecovery.org/?language=English" },
+    { name: "Women for Sobriety", who: "Online meetings", url: "https://meetings.womenforsobriety.org/meetings/" }
+  ];
   var db = load();
 
   function load() {
-    try {
-      var raw = localStorage.getItem(KEY);
-      if (raw) { var p = JSON.parse(raw); if (!p.days) p.days = {}; if (!p.goals) p.goals = []; if (!("startDate" in p)) p.startDate = null; if (!("commitDate" in p)) p.commitDate = null; return p; }
-    } catch (e) {}
-    return { days: {}, goals: [], startDate: null, commitDate: null };
+    var p = null;
+    try { var raw = localStorage.getItem(KEY); if (raw) p = JSON.parse(raw); } catch (e) {}
+    if (!p || typeof p !== "object") p = {};
+    if (!p.days) p.days = {};
+    if (!p.goals) p.goals = [];
+    if (!("startDate" in p)) p.startDate = null;
+    if (!("commitDate" in p)) p.commitDate = null;
+    if (!p.meetings) p.meetings = DEFAULT_MEETINGS.map(function (m) { return { name: m.name, who: m.who, url: m.url }; });
+    if (!p.milestoneNotes) p.milestoneNotes = {};
+    if (!("milestoneInit" in p)) p.milestoneInit = false;
+    if (!("lastSeenClear" in p)) p.lastSeenClear = null;
+    return p;
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
 
@@ -524,7 +618,7 @@
   }
   function markText(drinks) {
     if (drinks === 0) return "\u2726";
-    if (drinks >= 7) return "7+";
+    if (drinks === 7) return "7+";
     return "" + drinks;
   }
 
@@ -562,14 +656,36 @@
     for (var k in db.days) { if (db.days[k].meeting === true) n++; }
     return n;
   }
-  function clearDays() { return db.startDate ? Math.max(0, daysSince(db.startDate)) : currentStreak(); }
-  function streakStartKey() {
+  function lastSlipKey(afterKey) {
+    var last = null;
+    for (var k in db.days) {
+      var e = db.days[k];
+      if (typeof e.drinks === "number" && e.drinks >= 1) {
+        if (afterKey && k < afterKey) continue;
+        if (!last || k > last) last = k;
+      }
+    }
+    return last;
+  }
+  function clearAnchor() {
+    if (db.startDate) {
+      var slip = lastSlipKey(db.startDate);
+      return slip ? addDays(slip, 1) : db.startDate;
+    }
     if (currentStreak() === 0) return null;
     var start = todayKey(); if (!isLogged(start)) start = addDays(start, -1);
     var k = start, last = null;
     while (isClear(k)) { last = k; k = addDays(k, -1); }
     return last;
   }
+  function clearDays() {
+    if (db.startDate) {
+      var d = daysSince(clearAnchor());
+      return d < 0 ? 0 : d;
+    }
+    return currentStreak();
+  }
+  function streakStartKey() { return clearAnchor(); }
   function drinksInMonth(y, m) {
     var pre = y + "-" + pad(m + 1) + "-", sum = 0;
     for (var k in db.days) { if (k.indexOf(pre) === 0) { var e = db.days[k]; if (typeof e.drinks === "number") sum += e.drinks; } }
@@ -611,12 +727,6 @@
   }
 
   // ---------- Hero: clear count, plant, milestone, commit ----------
-  var MEETINGS = [
-    { name: "SMART Recovery", who: "Steven Rossetti · online", url: "https://24hourrecovery.org/?language=English&facilitator=658" },
-    { name: "SMART Recovery", who: "Joe Gerstein · online", url: "https://24hourrecovery.org/?language=English&facilitator=87" },
-    { name: "Women for Sobriety", who: "Online meetings", url: "https://meetings.womenforsobriety.org/meetings/" }
-  ];
-
   function nextMilestone(cd) {
     for (var i = 0; i < MILESTONES.length; i++) { if (MILESTONES[i].d > cd) return MILESTONES[i]; }
     return null;
@@ -627,7 +737,7 @@
     document.getElementById("heroLabel").textContent = "Clear";
     document.getElementById("heroNum").textContent = cd;
     document.getElementById("heroUnit").textContent = cd === 1 ? "day" : "days";
-    var ss = db.startDate || streakStartKey();
+    var ss = clearAnchor();
     document.getElementById("heroSince").innerHTML = ss
       ? ("clear since<br><span class=\"since-date\"><u>" + fmtLong(ss) + "</u></span>")
       : "<span class=\"since-date\"><u>set your start date</u></span>";
@@ -651,21 +761,65 @@
     document.getElementById("mMeetL").textContent = mo + " MEETINGS";
   }
 
-  function renderCommit() {
+  function renderCommit(celebrate) {
     var committed = db.commitDate === todayKey();
-    document.getElementById("commitBox").className = "commit-box" + (committed ? " on" : "");
-    document.getElementById("commitBox").textContent = committed ? "\u2713" : "";
-    document.getElementById("commitText").textContent = committed ? "Clear day committed" : "Commit to a clear day";
+    var box = document.getElementById("commitBox");
+    box.className = "commit-box" + (committed ? " on" : "");
+    box.innerHTML = committed ? "\u2713" : "";
+    document.getElementById("commitBtn").className = "commit" + (committed ? " done" : "");
+    document.getElementById("commitText").textContent = committed ? "Clear day committed \u2726" : "Commit to a clear day";
+    if (celebrate && committed) {
+      box.classList.remove("pop"); void box.offsetWidth; box.classList.add("pop");
+      confettiBurst();
+    }
+  }
+
+  function confettiBurst() {
+    var c = document.createElement("canvas");
+    c.style.cssText = "position:fixed;inset:0;pointer-events:none;z-index:70;";
+    document.body.appendChild(c);
+    var ctx = c.getContext("2d");
+    c.width = window.innerWidth; c.height = window.innerHeight;
+    var colors = ["#697a95", "#8a7fa2", "#7a315c", "#225c63", "#a6d0c4", "#ffffff", "#684a7b"];
+    var cx = window.innerWidth / 2, cy = window.innerHeight * 0.4, parts = [];
+    for (var i = 0; i < 100; i++) {
+      var ang = Math.random() * Math.PI * 2, sp = 4 + Math.random() * 8;
+      parts.push({ x: cx, y: cy, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp - 3, g: 0.16 + Math.random() * 0.12, size: 5 + Math.random() * 6, color: colors[i % colors.length], rot: Math.random() * 6, vr: (Math.random() - 0.5) * 0.4, shape: Math.random() < 0.5 ? 0 : 1 });
+    }
+    var t0 = performance.now();
+    function frame(t) {
+      var el = t - t0;
+      ctx.clearRect(0, 0, c.width, c.height);
+      for (var j = 0; j < parts.length; j++) {
+        var p = parts[j];
+        p.vy += p.g; p.x += p.vx; p.y += p.vy; p.vx *= 0.99; p.rot += p.vr;
+        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.rot);
+        ctx.globalAlpha = Math.max(0, 1 - el / 1700); ctx.fillStyle = p.color;
+        if (p.shape === 0) ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size * 0.6);
+        else { ctx.beginPath(); ctx.arc(0, 0, p.size / 2, 0, 7); ctx.fill(); }
+        ctx.restore();
+      }
+      if (el < 1700) requestAnimationFrame(frame); else c.remove();
+    }
+    requestAnimationFrame(frame);
   }
 
   function renderMeetings() {
-    var html = MEETINGS.map(function (m) {
+    var list = db.meetings || [];
+    var pub = list.map(function (m) {
       return '<a class="mtg" href="' + m.url + '" target="_blank" rel="noopener">' +
-        '<span><div class="m-name">' + m.name + '</div><div class="m-who">' + m.who + '</div></span>' +
+        '<span><div class="m-name">' + esc(m.name) + '</div><div class="m-who">' + esc(m.who || "") + '</div></span>' +
         '<span class="m-go">Open \u2197</span></a>';
     }).join("");
-    document.getElementById("meetingsList").innerHTML = html;
-    document.getElementById("meetingsListSettings").innerHTML = html;
+    document.getElementById("meetingsList").innerHTML = pub || '<div class="goals-empty">No meetings yet.</div>';
+    var setHtml = list.map(function (m, i) {
+      return '<div class="mtg"><span><div class="m-name">' + esc(m.name) + '</div><div class="m-who">' + esc(m.who || "") + '</div></span>' +
+        '<button class="mtg-del" data-i="' + i + '">Remove</button></div>';
+    }).join("");
+    document.getElementById("meetingsListSettings").innerHTML = setHtml || '<div class="goals-empty">No meetings yet.</div>';
+    Array.prototype.forEach.call(document.querySelectorAll("#meetingsListSettings .mtg-del"), function (btn) {
+      btn.addEventListener("click", function () { db.meetings.splice(+btn.getAttribute("data-i"), 1); save(); renderMeetings(); });
+    });
   }
 
   // ---------- Plant ----------
@@ -779,13 +933,14 @@
     } else if (st === 7) {
       c += trunk(76, 8) + canopy(70, 70, 24) + blossomsAround(70, 70, 24, 1).replace(P.blossom, P.blossom2);
     } else if (st === 8) {
-      c += trunk(74, 9) + canopy(70, 66, 29);
+      c += trunk(74, 9) + canopy(70, 66, 29) + star(30, 44, 3.5) + star(112, 40, 3);
     } else if (st === 9) {
-      c += trunk(74, 10) + canopy(70, 64, 32) + blossomsAround(70, 64, 32, 5);
+      c += trunk(74, 10) + canopy(70, 64, 32) + blossomsAround(70, 64, 32, 6) + star(70, 26, 3);
     } else if (st === 10) {
-      c += trunk(76, 11) + canopy(70, 66, 35) + blossomsAround(70, 66, 35, 8) + bird(26, 84);
+      c += trunk(76, 11) + canopy(70, 66, 35) + blossomsAround(70, 66, 35, 8) + fruitAround(70, 66, 35, 2) + bird(26, 84);
+      c += star(22, 40, 4.5) + star(118, 34, 4) + star(70, 22, 3.5);
     } else if (st === 11) {
-      c += trunk(78, 12) + canopy(70, 66, 38) + blossomsAround(70, 66, 38, 11);
+      c += trunk(78, 12) + canopy(70, 66, 38) + blossomsAround(70, 66, 38, 12) + fruitAround(70, 66, 38, 3) + star(28, 42, 3.5) + star(114, 38, 3);
     } else if (st === 12) {
       c += trunk(78, 12) + canopy(70, 66, 38) + blossomsAround(70, 66, 38, 5) + fruitAround(70, 66, 38, 3);
       c += nest(102, 74) + '<path d="M40 125 V113" stroke="' + P.stem + '" stroke-width="2.6" fill="none" stroke-linecap="round"/>' + leaf(40, 117, 1) + leaf(40, 113, -1);
@@ -891,6 +1046,10 @@
   // ---------- Year view ----------
   function renderYear() {
     document.getElementById("calPeriod").textContent = "" + vy;
+    var cdY = clearDays(), anchorY = clearAnchor();
+    document.getElementById("yearHeadline").innerHTML = anchorY
+      ? (cdY + (cdY === 1 ? " clear day" : " clear days") + "<span>since " + fmtLong(anchorY) + "</span>")
+      : "Log a clear day to grow your streak";
     var ys = yearStats(vy);
     document.getElementById("yearStats").innerHTML =
       '<div class="mini-stat"><b>' + ys.total + '</b><small>DRINKS ' + vy + '</small></div>' +
@@ -953,27 +1112,159 @@
     renderStats();
   }
 
+  // ---------- Share image ----------
+  function shareTierColor(d) { if (d === 0) return "#697a95"; if (d <= 2) return "#a9bbc4"; if (d <= 4) return "#8a7fa2"; if (d <= 6) return "#7a315c"; return "#452e52"; }
+  function shareTextColor(d) { return (d >= 1 && d <= 2) ? "#2c3b47" : "#ffffff"; }
+
+  function buildShareCanvas(m) {
+    var W = 540, pad = 28, headerH = 150, footerH = 66, scale = 2;
+    var colW, gap = 14, cols = 3, cell, monthTitleH = 20, dowH = 12, monthBlockH, rowsY = 4, H;
+    if (m === "year") {
+      colW = (W - pad * 2 - gap * (cols - 1)) / cols; cell = colW / 7;
+      monthBlockH = monthTitleH + dowH + cell * 6 + 10;
+      H = headerH + 20 + rowsY * monthBlockH + (rowsY - 1) * 16 + footerH;
+    } else {
+      var cm = (W - pad * 2) / 7; H = headerH + 30 + cm * 6 + footerH;
+    }
+    var cv = document.createElement("canvas");
+    cv.width = W * scale; cv.height = Math.ceil(H) * scale;
+    var ctx = cv.getContext("2d"); ctx.scale(scale, scale);
+    ctx.fillStyle = "#ffffff"; ctx.fillRect(0, 0, W, H);
+    function rr(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+    function star4(cx, cy, r, color) {
+      var inner = r * 0.4; ctx.beginPath();
+      for (var i = 0; i < 8; i++) { var a = -Math.PI / 2 + i * Math.PI / 4, rad = (i % 2 === 0) ? r : inner; var x = cx + Math.cos(a) * rad, y = cy + Math.sin(a) * rad; if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y); }
+      ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+    }
+
+    var grad = ctx.createLinearGradient(0, 0, W, headerH);
+    grad.addColorStop(0, "#697a95"); grad.addColorStop(1, "#4f6977");
+    ctx.fillStyle = grad; ctx.fillRect(0, 0, W, headerH);
+    ctx.fillStyle = "#ffffff"; ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
+    ctx.font = "700 24px Poppins, sans-serif"; ctx.fillText("ClearDays", pad, 44);
+    ctx.globalAlpha = 0.9; ctx.font = "italic 300 14px Poppins, sans-serif"; ctx.fillText("one day at a time", pad, 64); ctx.globalAlpha = 1;
+    if (m === "year") {
+      ctx.font = "700 58px Poppins, sans-serif"; ctx.fillText("" + vy, pad, 130);
+      var ys = yearStats(vy);
+      ctx.textAlign = "right"; ctx.font = "500 15px Poppins, sans-serif";
+      ctx.fillText(ys.clear + " clear days · " + ys.total + " drinks", W - pad, 130);
+    } else {
+      ctx.font = "700 36px Poppins, sans-serif"; ctx.fillText(MONTHS[vm] + " " + vy, pad, 120);
+      ctx.textAlign = "right"; ctx.font = "500 14px Poppins, sans-serif";
+      ctx.fillText(drinksInMonth(vy, vm) + " drinks · " + countInMonth(vy, vm, "exercise") + " active", W - pad, 120);
+    }
+    ctx.textAlign = "left";
+
+    if (m === "year") {
+      var startY = headerH + 22, dl = ["S", "M", "T", "W", "T", "F", "S"];
+      for (var mi = 0; mi < 12; mi++) {
+        var col = mi % 3, row = Math.floor(mi / 3);
+        var mx = pad + col * (colW + gap), my = startY + row * (monthBlockH + 16);
+        ctx.fillStyle = "#3b4146"; ctx.font = "700 13px Poppins, sans-serif"; ctx.textAlign = "center";
+        ctx.fillText(MONTHS_SHORT[mi].toUpperCase(), mx + colW / 2, my + 12);
+        ctx.fillStyle = "#a8a7a5"; ctx.font = "600 7px Poppins, sans-serif";
+        for (var di = 0; di < 7; di++) ctx.fillText(dl[di], mx + cell * di + cell / 2, my + monthTitleH + dowH - 3);
+        var first = new Date(vy, mi, 1).getDay(), dim = new Date(vy, mi + 1, 0).getDate();
+        var gy = my + monthTitleH + dowH + 2, ps = cell - 1.5;
+        for (var d = 1; d <= dim; d++) {
+          var idx = first + d - 1, cx = mx + (idx % 7) * cell, cyy = gy + Math.floor(idx / 7) * cell;
+          var e = db.days[keyOf(new Date(vy, mi, d))];
+          if (e && typeof e.drinks === "number") {
+            ctx.fillStyle = shareTierColor(e.drinks); rr(cx, cyy, ps, ps, 2); ctx.fill();
+            if (e.drinks >= 1) { ctx.fillStyle = shareTextColor(e.drinks); ctx.font = "600 " + (cell * 0.48).toFixed(0) + "px Poppins, sans-serif"; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(e.drinks >= 7 ? "7+" : ("" + e.drinks), cx + ps / 2, cyy + ps / 2 + 0.5); ctx.textBaseline = "alphabetic"; }
+            else { star4(cx + ps / 2, cyy + ps / 2, cell * 0.27, "#ffffff"); }
+          } else { ctx.fillStyle = "#eef1f3"; rr(cx, cyy, ps, ps, 2); ctx.fill(); }
+        }
+      }
+    } else {
+      var cm = (W - pad * 2) / 7, gyM = headerH + 34, dn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+      ctx.fillStyle = "#7c8894"; ctx.font = "500 12px Poppins, sans-serif"; ctx.textAlign = "center";
+      for (var i2 = 0; i2 < 7; i2++) ctx.fillText(dn[i2], pad + cm * i2 + cm / 2, gyM - 8);
+      var f2 = new Date(vy, vm, 1).getDay(), dm2 = new Date(vy, vm + 1, 0).getDate(), inner = cm - 4;
+      for (var d2 = 1; d2 <= dm2; d2++) {
+        var i3 = f2 + d2 - 1, cx2 = pad + (i3 % 7) * cm, cy2 = gyM + Math.floor(i3 / 7) * cm;
+        var e2 = db.days[keyOf(new Date(vy, vm, d2))];
+        ctx.textAlign = "center"; ctx.textBaseline = "middle";
+        if (e2 && typeof e2.drinks === "number") {
+          ctx.fillStyle = shareTierColor(e2.drinks); rr(cx2 + 2, cy2 + 2, inner, inner, 8); ctx.fill();
+          ctx.fillStyle = shareTextColor(e2.drinks);
+          if (e2.drinks >= 1) {
+            ctx.font = "600 17px Poppins, sans-serif";
+            ctx.fillText(e2.drinks >= 7 ? "7+" : ("" + e2.drinks), cx2 + cm / 2, cy2 + cm / 2 - 5);
+            ctx.font = "500 11px Poppins, sans-serif";
+            ctx.fillText("" + d2, cx2 + cm / 2, cy2 + cm / 2 + 13);
+          } else {
+            star4(cx2 + cm / 2, cy2 + cm / 2 - 6, 8, "#ffffff");
+            ctx.font = "500 11px Poppins, sans-serif";
+            ctx.fillText("" + d2, cx2 + cm / 2, cy2 + cm / 2 + 13);
+          }
+        } else {
+          ctx.strokeStyle = "#e3e7ea"; ctx.lineWidth = 1; rr(cx2 + 2, cy2 + 2, inner, inner, 8); ctx.stroke();
+          ctx.fillStyle = "#3b4146"; ctx.font = "500 14px Poppins, sans-serif";
+          ctx.fillText("" + d2, cx2 + cm / 2, cy2 + cm / 2);
+        }
+        ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
+      }
+    }
+
+    var fy = H - 38, lx = pad, legend = [["#697a95", "Clear"], ["#a9bbc4", "1–2"], ["#8a7fa2", "3–4"], ["#7a315c", "5–6"], ["#452e52", "7+"]];
+    ctx.textBaseline = "middle"; ctx.textAlign = "left";
+    legend.forEach(function (l) {
+      ctx.fillStyle = l[0]; rr(lx, fy - 6, 12, 12, 3); ctx.fill();
+      ctx.fillStyle = "#7c8894"; ctx.font = "500 12px Poppins, sans-serif"; ctx.fillText(l[1], lx + 16, fy);
+      lx += 16 + ctx.measureText(l[1]).width + 14;
+    });
+    ctx.textBaseline = "alphabetic"; ctx.textAlign = "right"; ctx.fillStyle = "#a8a7a5"; ctx.font = "italic 300 12px Poppins, sans-serif";
+    ctx.fillText("ClearDays", W - pad, fy + 3);
+    ctx.textAlign = "left";
+    return cv;
+  }
+
+  function shareImage() {
+    var ready = (document.fonts && document.fonts.ready) ? document.fonts.ready : Promise.resolve();
+    ready.then(function () {
+      var cv;
+      try { cv = buildShareCanvas(mode); } catch (e) { toast("Couldn't build the image", false); return; }
+      cv.toBlob(function (blob) {
+        if (!blob) { toast("Couldn't build the image", false); return; }
+        var fname = "cleardays-" + (mode === "year" ? vy : (MONTHS_SHORT[vm].toLowerCase() + "-" + vy)) + ".png";
+        var file = null;
+        try { file = new File([blob], fname, { type: "image/png" }); } catch (e) {}
+        if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+          navigator.share({ files: [file], title: "ClearDays", text: (mode === "year" ? ("My " + vy) : (MONTHS[vm] + " " + vy)) + " · ClearDays" }).catch(function () {});
+        } else {
+          var url = URL.createObjectURL(blob);
+          var a = document.createElement("a"); a.href = url; a.download = fname;
+          document.body.appendChild(a); a.click(); a.remove();
+          setTimeout(function () { URL.revokeObjectURL(url); }, 2000);
+          toast("Image saved", false);
+        }
+      }, "image/png");
+    });
+  }
+  document.getElementById("shareBtn").addEventListener("click", shareImage);
+
   // ---------- Milestones ----------
   var MILESTONES = [
-    { d: 1, short: "first", name: "First day", meaning: "Choosing to begin", ico: "🌱" },
-    { d: 3, short: "3-day", name: "3 days", meaning: "Change has started underground", ico: "🌱" },
-    { d: 7, short: "1-week", name: "1 week", meaning: "A shoot breaks through", ico: "🌿" },
-    { d: 14, short: "2-week", name: "2 weeks", meaning: "A new pattern is opening", ico: "🌿" },
-    { d: 30, short: "1-month", name: "1 month", meaning: "Building stability", ico: "🌾" },
-    { d: 60, short: "2-month", name: "2 months", meaning: "Developing capacity", ico: "🌿" },
-    { d: 90, short: "3-month", name: "3 months", meaning: "Becoming established", ico: "🌳" },
-    { d: 100, short: "100-day", name: "100 days", meaning: "A distinct achievement", ico: "🌳" },
-    { d: 180, short: "6-month", name: "6 months", meaning: "Strength and resilience", ico: "🌳" },
-    { d: 270, short: "9-month", name: "9 months", meaning: "Approaching a full cycle", ico: "🌸" },
-    { d: 365, short: "1-year", name: "1 year", meaning: "Growth that supports life", ico: "🌸" },
-    { d: 547, short: "18-month", name: "18 months", meaning: "Fuller bloom", ico: "🌸" },
-    { d: 730, short: "2-year", name: "2 years", meaning: "Fruit and new life nearby", ico: "🍎" },
-    { d: 1095, short: "3-year", name: "3 years", meaning: "A whole small ecosystem", ico: "🌳" },
-    { d: 1825, short: "5-year", name: "5 years", meaning: "A grove that shelters others", ico: "🌲" }
+    { d: 1, short: "first", name: "First day", meaning: "Choosing to begin", ico: "🌱", body: "The hardest part is starting, and you did. Notice how it feels to choose this for yourself." },
+    { d: 3, short: "3-day", name: "3 days", meaning: "Change has started underground", ico: "🌱", body: "Your body is already adjusting. Sleep may feel different and cravings often start to ease a little." },
+    { d: 7, short: "1-week", name: "1 week", meaning: "A shoot breaks through", ico: "🌿", body: "A full week. Many people notice steadier mornings, a bit more energy, and better hydration." },
+    { d: 14, short: "2-week", name: "2 weeks", meaning: "A new pattern is opening", ico: "🌿", body: "Two weeks in, sleep and mood often start to settle. A new pattern is taking hold." },
+    { d: 30, short: "1-month", name: "1 month", meaning: "Building stability", ico: "🌾", body: "A month is a real milestone. People often report clearer thinking, brighter skin, and deeper sleep." },
+    { d: 60, short: "2-month", name: "2 months", meaning: "Developing capacity", ico: "🌿", body: "Energy and mood tend to feel steadier now. The routines you've built are becoming your normal." },
+    { d: 90, short: "3-month", name: "3 months", meaning: "Becoming established", ico: "🌳", body: "Three months of choices. Many notice sharper focus, calmer evenings, and genuine momentum." },
+    { d: 100, short: "100-day", name: "100 days", meaning: "A distinct achievement", ico: "🌳", body: "One hundred days. That's a lot of small brave decisions. It's worth pausing to feel proud." },
+    { d: 180, short: "6-month", name: "6 months", meaning: "Strength and resilience", ico: "🌳", body: "Half a year. Relationships, finances, and rest often feel lighter. You've built real resilience." },
+    { d: 270, short: "9-month", name: "9 months", meaning: "Approaching a full cycle", ico: "🌸", body: "Nine months of steadiness. Many people say they feel more like themselves than they have in years." },
+    { d: 365, short: "1-year", name: "1 year", meaning: "Growth that supports life", ico: "🌸", body: "A full year. However you got here, this is a genuine achievement. Let yourself celebrate it." },
+    { d: 547, short: "18-month", name: "18 months", meaning: "Fuller bloom", ico: "🌸", body: "Eighteen months. The habits are deep now, and many describe a steadier, more reliable baseline." },
+    { d: 730, short: "2-year", name: "2 years", meaning: "Fruit and new life nearby", ico: "🍎", body: "Two years of choices, stacked. Your steadiness often starts to support the people around you too." },
+    { d: 1095, short: "3-year", name: "3 years", meaning: "A whole small ecosystem", ico: "🌳", body: "Three years. What began as one clear day has grown into a whole ecosystem of change." },
+    { d: 1825, short: "5-year", name: "5 years", meaning: "A grove that shelters others", ico: "🌲", body: "Five years. This is a foundation, not a finish line, and a light for anyone walking behind you." }
   ];
   function renderMilestones() {
     var cd = clearDays();
-    var earned = Math.max(cd, longestStreak());
+    var earned = cd;
     var nm = nextMilestone(cd);
     var nextBox = document.getElementById("msNext");
     if (nm) {
@@ -1005,8 +1296,43 @@
   function badgeEl(m, on) {
     var b = document.createElement("div");
     b.className = "badge" + (on ? " earned" : "");
-    b.innerHTML = '<div class="b-ico">' + m.ico + '</div><div class="b-name">' + m.name + '</div><div class="b-days">' + m.d + (m.d === 1 ? " day" : " days") + '</div>';
+    b.innerHTML = '<div class="b-plant">' + plantSVG(m.d) + '</div><div class="b-name">' + m.name + '</div><div class="b-days">' + m.d + (m.d === 1 ? " day" : " days") + '</div>';
+    b.addEventListener("click", function () { openMilestone(m, on); });
     return b;
+  }
+
+  var curMs = null;
+  function openMilestone(m, on) {
+    curMs = m;
+    document.getElementById("mPlant").innerHTML = plantSVG(m.d);
+    document.getElementById("mTitle").textContent = m.name + (on ? "  \u2713" : "");
+    document.getElementById("mSub").textContent = m.d + (m.d === 1 ? " clear day · " : " clear days · ") + m.meaning;
+    document.getElementById("mBody").textContent = m.body || "";
+    document.getElementById("mNote").value = (db.milestoneNotes && db.milestoneNotes[m.d]) || "";
+    document.getElementById("mOverlay").classList.add("on");
+    document.getElementById("mSheet").classList.add("on");
+  }
+  function closeMilestone() {
+    document.getElementById("mOverlay").classList.remove("on");
+    document.getElementById("mSheet").classList.remove("on");
+  }
+
+  function baselineMilestones() {
+    db.milestoneInit = true;
+    db.lastSeenClear = { anchor: clearAnchor(), days: clearDays() };
+    save();
+  }
+  function checkMilestonePrompt() {
+    var cd = clearDays(), anchor = clearAnchor();
+    if (!db.milestoneInit) { baselineMilestones(); return; }
+    if (!anchor) { db.lastSeenClear = { anchor: null, days: 0 }; save(); return; }
+    var ls = db.lastSeenClear || { anchor: null, days: 0 };
+    var prevDays = (ls.anchor === anchor) ? ls.days : 0;
+    var newest = null;
+    MILESTONES.forEach(function (m) { if (m.d > prevDays && m.d <= cd) newest = m; });
+    db.lastSeenClear = { anchor: anchor, days: cd };
+    save();
+    if (newest && !document.querySelector(".sheet.on")) { confettiBurst(); openMilestone(newest, true); }
   }
 
   // ---------- Entry sheet ----------
@@ -1032,6 +1358,7 @@
       c.textContent = o.label;
       c.addEventListener("click", function () {
         draft.drinks = o.v;
+        document.getElementById("drinkCustom").value = "";
         document.querySelectorAll("#drinkChips .chip").forEach(function (x) { x.classList.remove("sel"); });
         c.classList.add("sel");
         refreshSaveBtn();
@@ -1069,6 +1396,8 @@
     document.querySelectorAll("#drinkChips .chip").forEach(function (x) {
       x.classList.toggle("sel", draft.drinks !== null && +x.getAttribute("data-val") === draft.drinks);
     });
+    var ci = document.getElementById("drinkCustom");
+    ci.value = (draft.drinks !== null && draft.drinks >= 8) ? draft.drinks : "";
   }
   function refreshSaveBtn() {
     var btn = document.getElementById("saveDay");
@@ -1096,6 +1425,17 @@
     curKey = null;
   }
 
+  document.getElementById("drinkCustom").addEventListener("input", function () {
+    var v = parseInt(this.value, 10);
+    if (!isNaN(v) && v >= 8) {
+      if (v > 99) { v = 99; this.value = "99"; }
+      draft.drinks = v;
+      document.querySelectorAll("#drinkChips .chip").forEach(function (x) { x.classList.remove("sel"); });
+      refreshSaveBtn();
+    } else if (this.value === "") {
+      if (draft.drinks !== null && draft.drinks >= 8) { draft.drinks = null; refreshSaveBtn(); }
+    }
+  });
   document.getElementById("exYes").addEventListener("click", function () { draft.exercise = draft.exercise === true ? null : true; syncToggles(); });
   document.getElementById("exNo").addEventListener("click", function () { draft.exercise = draft.exercise === false ? null : false; syncToggles(); });
   document.getElementById("mtYes").addEventListener("click", function () { draft.meeting = draft.meeting === true ? null : true; syncToggles(); });
@@ -1109,7 +1449,8 @@
     var dry = draft.drinks === 0;
     closeSheet();
     renderAll();
-    toast(dry ? "\u2726 Clear day logged. Nice work." : "Logged " + (draft.drinks >= 7 ? "7+" : draft.drinks) + " drink" + (draft.drinks === 1 ? "" : "s"), dry);
+    toast(dry ? "\u2726 Clear day logged. Nice work." : "Logged " + (draft.drinks === 7 ? "7+" : draft.drinks) + " drink" + (draft.drinks === 1 ? "" : "s"), dry);
+    checkMilestonePrompt();
   });
 
   document.getElementById("clearDay").addEventListener("click", function () {
@@ -1192,13 +1533,13 @@
     db.startDate = this.value || null;
     save();
     document.getElementById("startHint").textContent = db.startDate ? (Math.max(0, daysSince(db.startDate)) + " days clear") : "Using your logged streak";
-    renderHero(); renderMilestones();
+    renderHero(); renderMilestones(); baselineMilestones();
   });
   document.getElementById("clearStart").addEventListener("click", function () {
     db.startDate = null; save();
     document.getElementById("startDateInput").value = "";
     document.getElementById("startHint").textContent = "Using your logged streak";
-    renderHero(); renderMilestones();
+    renderHero(); renderMilestones(); baselineMilestones();
   });
   document.getElementById("closeSettings").addEventListener("click", closeSettings);
   document.getElementById("sOverlay").addEventListener("click", closeSettings);
@@ -1245,14 +1586,84 @@
     var committed = db.commitDate === todayKey();
     db.commitDate = committed ? null : todayKey();
     save();
-    renderCommit();
-    if (db.commitDate) toast("Committed to a clear day", true);
+    renderCommit(!committed);
+    if (db.commitDate) toast("Clear day committed \u2726", true);
   });
   document.getElementById("sheetMeetingLink").addEventListener("click", function (e) {
     e.preventDefault();
     closeSheet();
     setTimeout(function () { document.getElementById("meetings").scrollIntoView({ behavior: "smooth", block: "start" }); }, 260);
   });
+
+  // ---------- Milestone note ----------
+  document.getElementById("mClose").addEventListener("click", closeMilestone);
+  document.getElementById("mOverlay").addEventListener("click", closeMilestone);
+  document.getElementById("mSave").addEventListener("click", function () {
+    if (!curMs) return;
+    if (!db.milestoneNotes) db.milestoneNotes = {};
+    var v = document.getElementById("mNote").value.trim();
+    if (v) db.milestoneNotes[curMs.d] = v; else delete db.milestoneNotes[curMs.d];
+    save();
+    closeMilestone();
+    toast("Note saved", false);
+  });
+
+  // ---------- Add meeting ----------
+  document.getElementById("mtgAdd").addEventListener("click", function () {
+    var name = document.getElementById("mtgName").value.trim();
+    var who = document.getElementById("mtgWho").value.trim();
+    var url = document.getElementById("mtgUrl").value.trim();
+    if (!name) { toast("Add a name", false); return; }
+    if (!/^https?:\/\//i.test(url)) { toast("Add a valid link (https://...)", false); return; }
+    db.meetings.push({ name: name, who: who, url: url });
+    save();
+    document.getElementById("mtgName").value = "";
+    document.getElementById("mtgWho").value = "";
+    document.getElementById("mtgUrl").value = "";
+    renderMeetings();
+    toast("Meeting added", false);
+  });
+
+  // ---------- Journal ----------
+  function openJournal() { renderJournal(); document.getElementById("jOverlay").classList.add("on"); document.getElementById("jSheet").classList.add("on"); }
+  function closeJournal() { document.getElementById("jOverlay").classList.remove("on"); document.getElementById("jSheet").classList.remove("on"); }
+  document.getElementById("openJournal").addEventListener("click", openJournal);
+  document.getElementById("jClose").addEventListener("click", closeJournal);
+  document.getElementById("jOverlay").addEventListener("click", closeJournal);
+  function renderJournal() {
+    var html = "";
+    var mnotes = db.milestoneNotes || {};
+    var mkeys = Object.keys(mnotes).filter(function (d) { return mnotes[d] && ("" + mnotes[d]).trim(); });
+    if (mkeys.length) {
+      html += '<div class="j-section">Milestone notes</div>';
+      mkeys.sort(function (a, b) { return (+a) - (+b); }).forEach(function (d) {
+        var m = MILESTONES.filter(function (x) { return x.d == d; })[0];
+        html += '<div class="j-item j-ms" data-ms="' + d + '"><div class="j-head">' + (m ? m.name : d + " days") + '</div><div class="j-note">' + esc(mnotes[d]) + '</div></div>';
+      });
+    }
+    var items = [];
+    for (var k in db.days) { var e = db.days[k]; if (e.note && e.note.trim()) items.push({ date: k, e: e }); }
+    items.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    if (items.length) {
+      html += '<div class="j-section">Daily reflections</div>';
+      items.forEach(function (it) {
+        var tags = [];
+        if (typeof it.e.drinks === "number") tags.push(it.e.drinks === 0 ? "clear" : markText(it.e.drinks) + (it.e.drinks === 1 ? " drink" : " drinks"));
+        if (it.e.exercise === true) tags.push("exercise");
+        if (it.e.meeting === true) tags.push("meeting");
+        html += '<div class="j-item" data-k="' + it.date + '"><div class="j-head">' + fmtLong(it.date) + (tags.length ? ' <span class="j-tag">' + tags.join(" · ") + '</span>' : '') + '</div><div class="j-note">' + esc(it.e.note) + '</div></div>';
+      });
+    }
+    if (!html) html = '<div class="goals-empty">No notes yet. Add a reflection when you log a day, or a note when you reach a milestone.</div>';
+    var wrap = document.getElementById("journalList");
+    wrap.innerHTML = html;
+    Array.prototype.forEach.call(wrap.querySelectorAll(".j-item[data-k]"), function (el) {
+      el.addEventListener("click", function () { closeJournal(); openSheet(el.getAttribute("data-k")); });
+    });
+    Array.prototype.forEach.call(wrap.querySelectorAll(".j-item[data-ms]"), function (el) {
+      el.addEventListener("click", function () { var d = +el.getAttribute("data-ms"); var m = MILESTONES.filter(function (x) { return x.d === d; })[0]; if (m) { closeJournal(); openMilestone(m, clearDays() >= d); } });
+    });
+  }
 
   // ---------- Nav + tabs ----------
   document.getElementById("tabMonth").addEventListener("click", function () {
@@ -1292,6 +1703,7 @@
 
   renderMeetings();
   buildChips(); buildMoods(); renderAll();
+  checkMilestonePrompt();
 })();
 </script>
 </body>
