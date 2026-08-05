@@ -1144,10 +1144,19 @@
     ctx.font = "700 24px Poppins, sans-serif"; ctx.fillText("ClearDays", pad, 44);
     ctx.globalAlpha = 0.9; ctx.font = "italic 300 14px Poppins, sans-serif"; ctx.fillText("one day at a time", pad, 64); ctx.globalAlpha = 1;
     if (m === "year") {
-      ctx.font = "700 58px Poppins, sans-serif"; ctx.fillText("" + vy, pad, 130);
-      var ys = yearStats(vy);
-      ctx.textAlign = "right"; ctx.font = "500 15px Poppins, sans-serif";
-      ctx.fillText(ys.clear + " clear days · " + ys.total + " drinks", W - pad, 130);
+      ctx.font = "700 56px Poppins, sans-serif"; ctx.fillText("" + vy, pad, 128);
+      var ys = yearStats(vy), cdY = clearDays(), anchorY = clearAnchor();
+      ctx.textAlign = "right";
+      if (anchorY) {
+        ctx.font = "700 22px Poppins, sans-serif";
+        ctx.fillText(cdY + (cdY === 1 ? " clear day" : " clear days"), W - pad, 96);
+        ctx.globalAlpha = 0.92; ctx.font = "400 13px Poppins, sans-serif";
+        ctx.fillText("since " + fmtLong(anchorY), W - pad, 114);
+        ctx.fillText(ys.total + " drinks this year", W - pad, 132); ctx.globalAlpha = 1;
+      } else {
+        ctx.font = "500 15px Poppins, sans-serif";
+        ctx.fillText(ys.clear + " clear days · " + ys.total + " drinks", W - pad, 130);
+      }
     } else {
       ctx.font = "700 36px Poppins, sans-serif"; ctx.fillText(MONTHS[vm] + " " + vy, pad, 120);
       ctx.textAlign = "right"; ctx.font = "500 14px Poppins, sans-serif";
