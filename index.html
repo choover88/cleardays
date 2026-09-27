@@ -67,18 +67,17 @@
     margin-top: 16px;
     background: linear-gradient(150deg, var(--blue) 0%, var(--blue-deep) 100%);
     border-radius: var(--radius);
-    padding: 20px 18px 18px;
+    padding: 14px;
     color: #fff;
     box-shadow: 0 8px 22px -12px rgba(79,105,119,0.6);
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
     gap: 10px;
+    align-items: stretch;
   }
-  .hero-id { flex: 1 1 0; min-width: 0; text-align: center; }
-  .hero-label { font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase; opacity: 0.82; font-weight: 500; }
-  .hero-num { font-family: var(--brand); font-weight: 700; font-size: 50px; line-height: 1; margin: 4px 0 2px; }
-  .hero-unit { font-size: 14px; opacity: 0.9; font-weight: 300; }
+  .hero-id { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: rgba(255,255,255,0.12); border-radius: 14px; padding: 12px 8px; }
+  .hero-num { font-family: var(--brand); font-weight: 700; font-size: 50px; line-height: 1; }
+  .hero-unit { font-size: 13px; opacity: 0.9; font-weight: 400; margin-top: 2px; }
   .hero-affirm { font-family: var(--sans); font-weight: 300; font-style: italic; font-size: 14.5px; opacity: 0.95; margin-top: 12px; line-height: 1.35; }
   .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
   .hstat { background: rgba(255,255,255,0.13); border-radius: var(--radius-sm); padding: 10px 8px; text-align: center; }
@@ -255,11 +254,12 @@
   .gear { width: 38px; height: 38px; border-radius: 50%; border: 1px solid var(--line); background: #fff; font-size: 17px; color: var(--muted); cursor: pointer; display: flex; align-items: center; justify-content: center; flex: 0 0 auto; }
   .gear:active { background: var(--line-soft); }
   /* hero start-date line */
-  .hero-since { font-size: 12.5px; opacity: 0.92; margin-top: 6px; cursor: pointer; display: inline-block; line-height: 1.5; }
+  .hero-since { font-size: 12px; opacity: 0.9; margin-top: 6px; cursor: pointer; line-height: 1.4; }
   .hero-since .since-date { font-weight: 600; }
   .hero-since u { text-underline-offset: 2px; }
-  .hero-pct { font-family: var(--brand); font-weight: 700; font-size: 15px; margin-top: 10px; opacity: 0.96; }
-  .hero-pct span { display: block; font-family: var(--sans); font-weight: 400; font-size: 11.5px; opacity: 0.85; margin-top: 1px; }
+  /* pct donut box (bottom-left, cutback) */
+  .hero-pct { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: rgba(255,255,255,0.12); border-radius: 14px; padding: 12px 8px; }
+  .hero-pct .pct-cap { font-size: 11.5px; opacity: 0.92; text-align: center; line-height: 1.3; }
   .mode-toggle { display: flex; gap: 8px; margin-top: 4px; }
   .mode-toggle button { flex: 1; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; }
   .mode-toggle button.on { background: var(--blue); border-color: var(--blue); color: #fff; }
@@ -278,11 +278,12 @@
   .install-steps { line-height: 1.7; }
   .install-steps b { color: var(--charcoal); font-weight: 600; }
   /* plant hero pieces */
-  .hero-plant { flex: 0 0 42%; display: flex; justify-content: center; align-items: center; margin-top: 0; background: #fff; border-radius: 14px; padding: 8px 6px; }
-  .hero-plant svg { width: 100%; max-width: 140px; height: auto; display: block; }
-  .hero-side { flex: 1 1 100%; margin-top: 8px; display: flex; flex-direction: column; gap: 11px; }
-  .hero-milestone { font-size: 12.5px; line-height: 1.35; opacity: 0.95; text-align: center; }
-  .commit { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; width: 100%; background: rgba(255,255,255,0.13); border: 0; border-radius: 14px; padding: 16px 12px; cursor: pointer; color: #fff; text-align: center; font-family: var(--sans); }
+  .hero-plant { display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 14px; padding: 8px 6px; }
+  .hero-plant svg { width: 100%; max-width: 130px; height: auto; display: block; }
+  .hero-milestone { grid-column: 1 / -1; text-align: center; font-size: 12.5px; opacity: 0.95; padding: 9px 4px; border-top: 1px solid rgba(255,255,255,0.2); border-bottom: 1px solid rgba(255,255,255,0.2); }
+  .commit { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; width: 100%; background: rgba(255,255,255,0.12); border: 0; border-radius: 14px; padding: 14px 10px; cursor: pointer; color: #fff; text-align: center; font-family: var(--sans); }
+  .hero:not(.cutback) .hero-pct { display: none; }
+  .hero:not(.cutback) .commit { grid-column: 1 / -1; }
   .commit:active { background: rgba(255,255,255,0.24); }
   .commit-box { width: 34px; height: 34px; border-radius: 9px; border: 2px solid rgba(255,255,255,0.8); flex: 0 0 auto; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--blue); font-weight: 700; }
   .commit-box.on { background: #fff; border-color: #fff; }
@@ -306,12 +307,9 @@
   .mtg .m-go { font-size: 13px; color: var(--blue); font-weight: 600; flex: 0 0 auto; }
 
   @media (min-width: 520px) {
-    .hero { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 0; }
-    .hero-num { font-size: 60px; }
-    .hero-id { order: 0; flex: 0 0 150px; align-self: center; text-align: center; padding-right: 20px; }
-    .hero-plant { order: 1; flex: 1 1 auto; align-self: stretch; align-items: center; margin: 0 6px; padding: 8px; }
-    .hero-plant svg { width: auto; max-width: 150px; max-height: 150px; }
-    .hero-side { order: 2; flex: 0 0 172px; align-self: stretch; justify-content: center; margin-top: 0; padding-left: 20px; }
+    .hero { gap: 12px; padding: 18px; }
+    .hero-num { font-size: 64px; }
+    .hero-plant svg { max-width: 150px; }
   }
   /* additions: badges as plants, commit celebration, milestone detail, journal */
   .head-btns { display: flex; gap: 8px; flex: 0 0 auto; }
@@ -358,22 +356,19 @@
 
 <div class="wrap">
   <!-- Hero -->
-  <div class="hero">
+  <div class="hero" id="hero">
     <div class="hero-id">
-      <div class="hero-label" id="heroLabel">Current streak</div>
       <div class="hero-num" id="heroNum">0</div>
-      <div class="hero-unit" id="heroUnit">days clear</div>
+      <div class="hero-unit" id="heroUnit">clear days</div>
       <div class="hero-since" id="heroSince"><u>Set your start date</u></div>
-      <div class="hero-pct" id="heroPct"></div>
     </div>
     <div class="hero-plant" id="heroPlant"></div>
-    <div class="hero-side">
-      <div class="hero-milestone" id="heroMilestone"></div>
-      <button class="commit" id="commitBtn" type="button">
-        <span class="commit-box" id="commitBox"></span>
-        <span class="commit-text" id="commitText">Today's plan: clear day</span>
-      </button>
-    </div>
+    <div class="hero-milestone" id="heroMilestone"></div>
+    <div class="hero-pct" id="heroPct"></div>
+    <button class="commit" id="commitBtn" type="button">
+      <span class="commit-box" id="commitBox"></span>
+      <span class="commit-text" id="commitText">Commit to a clear day</span>
+    </button>
   </div>
 
   <div class="mini-stats">
@@ -781,25 +776,33 @@
     for (var i = 0; i < MILESTONES.length; i++) { if (MILESTONES[i].d > cd) return MILESTONES[i]; }
     return null;
   }
+  function pctDonut(pct) {
+    var r = 24, c = 2 * Math.PI * r, p = Math.max(0, Math.min(100, pct)), off = c * (1 - p / 100);
+    return '<svg viewBox="0 0 60 60" width="54" height="54" aria-hidden="true">' +
+      '<circle cx="30" cy="30" r="' + r + '" fill="none" stroke="rgba(255,255,255,0.25)" stroke-width="7"/>' +
+      '<circle cx="30" cy="30" r="' + r + '" fill="none" stroke="#ffffff" stroke-width="7" stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" transform="rotate(-90 30 30)"/>' +
+      '<text x="30" y="35" text-anchor="middle" font-family="Poppins, sans-serif" font-weight="700" font-size="15" fill="#ffffff">' + pct + '%</text>' +
+      '</svg>';
+  }
 
   function renderHero() {
     var cd = clearDays();
     var cutback = db.mode === "cutback";
-    document.getElementById("heroLabel").textContent = cutback ? "On track" : "Clear";
+    document.getElementById("hero").classList.toggle("cutback", cutback);
     document.getElementById("heroNum").textContent = cd;
-    document.getElementById("heroUnit").textContent = cd === 1 ? "day" : "days";
+    document.getElementById("heroUnit").textContent = cd === 1 ? "clear day" : "clear days";
     var ss = clearAnchor();
-    var word = cutback ? "on track since" : "clear since";
     document.getElementById("heroSince").innerHTML = ss
-      ? (word + "<br><span class=\"since-date\"><u>" + fmtLong(ss) + "</u></span>")
-      : "<span class=\"since-date\"><u>set your start date</u></span>";
+      ? "<span class=\"since-date\"><u>" + fmtLong(ss) + "</u></span>"
+      : "<span class=\"since-date\"><u>set start date</u></span>";
     var pctEl = document.getElementById("heroPct");
     if (cutback) {
       var cs = clearStats();
-      pctEl.style.display = "";
-      pctEl.innerHTML = cs.logged ? (cs.pct + "% clear<span>" + cs.clear + " of " + cs.logged + " days logged</span>") : "<span>Log your days to see your % clear</span>";
+      pctEl.innerHTML = cs.logged
+        ? (pctDonut(cs.pct) + "<div class=\"pct-cap\">clear · " + cs.clear + "/" + cs.logged + " days</div>")
+        : (pctDonut(0) + "<div class=\"pct-cap\">log days to see</div>");
     } else {
-      pctEl.style.display = "none";
+      pctEl.innerHTML = "";
     }
     document.getElementById("heroPlant").innerHTML = plantSVG(cd);
     var nm = nextMilestone(cd);
@@ -1813,16 +1816,4 @@
     t.textContent = msg;
     t.className = "toast show" + (dry ? " dry" : "");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.className = "toast" + (dry ? " dry" : ""); }, 2200);
-  }
-
-  // ---------- Render all ----------
-  function renderAll() { renderHero(); renderGoals(); renderCalendar(); renderMilestones(); }
-
-  renderMeetings();
-  buildChips(); buildMoods(); renderAll();
-  checkMilestonePrompt();
-})();
-</script>
-</body>
-</html>
+    toastTimer = setTimeout(function () { t.className = "toas
