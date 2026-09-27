@@ -1816,4 +1816,16 @@
     t.textContent = msg;
     t.className = "toast show" + (dry ? " dry" : "");
     clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { t.className = "toas
+    toastTimer = setTimeout(function () { t.className = "toast" + (dry ? " dry" : ""); }, 2200);
+  }
+
+  // ---------- Render all ----------
+  function renderAll() { renderHero(); renderGoals(); renderCalendar(); renderMilestones(); }
+
+  renderMeetings();
+  buildChips(); buildMoods(); renderAll();
+  checkMilestonePrompt();
+})();
+</script>
+</body>
+</html>
