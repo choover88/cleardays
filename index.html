@@ -67,13 +67,17 @@
     margin-top: 16px;
     background: linear-gradient(150deg, var(--blue) 0%, var(--blue-deep) 100%);
     border-radius: var(--radius);
-    padding: 22px 20px 20px;
+    padding: 20px 18px 18px;
     color: #fff;
     box-shadow: 0 8px 22px -12px rgba(79,105,119,0.6);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
   }
-  .hero-id { text-align: center; }
+  .hero-id { flex: 1 1 0; min-width: 0; text-align: center; }
   .hero-label { font-size: 12px; letter-spacing: 1.4px; text-transform: uppercase; opacity: 0.82; font-weight: 500; }
-  .hero-num { font-family: var(--brand); font-weight: 700; font-size: 62px; line-height: 1; margin: 4px 0 2px; }
+  .hero-num { font-family: var(--brand); font-weight: 700; font-size: 50px; line-height: 1; margin: 4px 0 2px; }
   .hero-unit { font-size: 14px; opacity: 0.9; font-weight: 300; }
   .hero-affirm { font-family: var(--sans); font-weight: 300; font-style: italic; font-size: 14.5px; opacity: 0.95; margin-top: 12px; line-height: 1.35; }
   .hero-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 18px; }
@@ -126,6 +130,7 @@
   .mcell .dmark { font-size: 11px; font-weight: 600; margin-top: 1px; }
   .mcell.today { box-shadow: inset 0 0 0 2px var(--navy); }
   .mcell.planned::after { content: "📅"; position: absolute; top: 3px; right: 3px; font-size: 9px; line-height: 1; opacity: 0.95; }
+  .mcell.future.planned { opacity: 0.6; }
   .mcell .flags { position: absolute; bottom: 3px; display: flex; gap: 3px; }
   .mcell .flag { width: 6px; height: 6px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,0.9); }
   .flag.ex { background: #2f8f7a; }
@@ -258,6 +263,8 @@
   .mode-toggle { display: flex; gap: 8px; margin-top: 4px; }
   .mode-toggle button { flex: 1; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; }
   .mode-toggle button.on { background: var(--blue); border-color: var(--blue); color: #fff; }
+  .planned-note { width: 100%; height: 44px; border: 1px solid var(--line); border-radius: 12px; padding: 0 13px; font-family: var(--sans); font-size: 14px; color: var(--ink); background: #fdfdfd; margin-top: 8px; }
+  .planned-note:focus { outline: none; border-color: var(--blue); }
   /* settings controls */
   .setting-date { width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 12px; padding: 0 13px; font-family: var(--sans); font-size: 14px; color: var(--ink); background: #fdfdfd; }
   .setting-date:focus { outline: none; border-color: var(--blue); }
@@ -271,9 +278,9 @@
   .install-steps { line-height: 1.7; }
   .install-steps b { color: var(--charcoal); font-weight: 600; }
   /* plant hero pieces */
-  .hero-plant { display: flex; justify-content: center; align-items: flex-end; margin-top: 12px; background: #fff; border-radius: 14px; padding: 10px 8px 6px; }
-  .hero-plant svg { width: 128px; height: auto; display: block; }
-  .hero-side { margin-top: 14px; display: flex; flex-direction: column; gap: 11px; }
+  .hero-plant { flex: 0 0 42%; display: flex; justify-content: center; align-items: center; margin-top: 0; background: #fff; border-radius: 14px; padding: 8px 6px; }
+  .hero-plant svg { width: 100%; max-width: 140px; height: auto; display: block; }
+  .hero-side { flex: 1 1 100%; margin-top: 8px; display: flex; flex-direction: column; gap: 11px; }
   .hero-milestone { font-size: 12.5px; line-height: 1.35; opacity: 0.95; text-align: center; }
   .commit { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; width: 100%; background: rgba(255,255,255,0.13); border: 0; border-radius: 14px; padding: 16px 12px; cursor: pointer; color: #fff; text-align: center; font-family: var(--sans); }
   .commit:active { background: rgba(255,255,255,0.24); }
@@ -299,7 +306,8 @@
   .mtg .m-go { font-size: 13px; color: var(--blue); font-weight: 600; flex: 0 0 auto; }
 
   @media (min-width: 520px) {
-    .hero { display: flex; align-items: stretch; gap: 0; }
+    .hero { display: flex; flex-wrap: nowrap; align-items: stretch; gap: 0; }
+    .hero-num { font-size: 60px; }
     .hero-id { order: 0; flex: 0 0 150px; align-self: center; text-align: center; padding-right: 20px; }
     .hero-plant { order: 1; flex: 1 1 auto; align-self: stretch; align-items: center; margin: 0 6px; padding: 8px; }
     .hero-plant svg { width: auto; max-width: 150px; max-height: 150px; }
@@ -322,6 +330,8 @@
   .j-item { border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; margin-bottom: 8px; cursor: pointer; }
   .j-item:active { background: var(--line-soft); }
   .j-item.j-ms { border-color: var(--blue-light); background: linear-gradient(160deg, #fff, rgba(105,122,149,0.06)); }
+  .j-item.j-planned { border-color: #e0b357; background: linear-gradient(160deg, #fff, rgba(224,179,87,0.16)); }
+  .j-item.j-planned .j-head { color: #8a6a1e; }
   .j-head { font-weight: 600; font-size: 13px; color: var(--charcoal); margin-bottom: 3px; }
   .j-tag { font-weight: 400; font-size: 11px; color: var(--muted); }
   .j-note { font-size: 13.5px; color: var(--charcoal); line-height: 1.45; white-space: pre-wrap; }
@@ -446,6 +456,7 @@
     <div class="field-label">Planned day</div>
     <button class="yn" id="plToggle" type="button" style="width:100%;"><span class="ic">📅</span> Planned day</button>
     <div class="s-date" style="margin-top:6px;">A holiday or event you planned for. It won't break your streak.</div>
+    <input type="text" id="plannedNote" class="planned-note" placeholder="The occasion (optional)" maxlength="60" style="display:none;" />
   </div>
 
   <div class="field-label">Exercise</div>
@@ -482,6 +493,7 @@
   <div class="gform">
     <input type="text" id="gLabel" placeholder="What is it? (e.g. Sarah's wedding)" maxlength="42" />
     <input type="date" id="gDate" />
+    <button class="yn" id="gPlanned" type="button" style="width:100%;display:none;margin-bottom:10px;"><span class="ic">📅</span> Planned drinking day</button>
     <button class="btn btn-primary" id="gAdd" style="width:100%;">Add date</button>
   </div>
   <div class="glist" id="gList"></div>
@@ -588,10 +600,7 @@
 
   var KEY = "cleardays_v1";
   var DEFAULT_MEETINGS = [
-    { name: "SMART Recovery", who: "Steven Rossetti · online", url: "https://24hourrecovery.org/?language=English&facilitator=658" },
-    { name: "SMART Recovery", who: "Joe Gerstein · online", url: "https://24hourrecovery.org/?language=English&facilitator=87" },
-    { name: "SMART Recovery", who: "All online meetings", url: "https://24hourrecovery.org/?language=English" },
-    { name: "Women for Sobriety", who: "Online meetings", url: "https://meetings.womenforsobriety.org/meetings/" }
+    { name: "SMART Recovery", who: "24-hour online meeting calendar", url: "https://24hourrecovery.org/?language=English" }
   ];
   var db = load();
 
@@ -1034,7 +1043,7 @@
       var c = document.createElement("div");
       c.className = "goal-card";
       c.innerHTML = '<div class="g-count">' + (days === 0 ? "Today" : days) + (days === 0 ? "" : '<small> ' + (days === 1 ? "day" : "days") + '</small>') + '</div>' +
-        '<div class="g-label">' + esc(g.label) + '</div>' +
+        '<div class="g-label">' + esc(g.label) + (g.planned ? " 📅" : "") + '</div>' +
         '<div class="g-date">' + fmtDate(g.date) + '</div>';
       c.addEventListener("click", function () { openSheet(g.date); });
       wrap.appendChild(c);
@@ -1079,7 +1088,7 @@
       if (entry && typeof entry.drinks === "number") cls += " " + tierClass(entry.drinks);
       if (k === tk) cls += " today";
       if (future) cls += " future";
-      if (db.mode === "cutback" && entry && entry.planned && entry.drinks >= 1) cls += " planned";
+      if (db.mode === "cutback" && ((entry && entry.planned && entry.drinks >= 1) || plannedGoalFor(k))) cls += " planned";
       cell.className = cls;
       var html = '<div class="dnum">' + d + "</div>";
       if (entry && typeof entry.drinks === "number") html += '<div class="dmark">' + markText(entry.drinks) + "</div>";
@@ -1399,7 +1408,11 @@
   // ---------- Entry sheet ----------
   var curKey = null, draft = null;
 
-  function blankDraft() { return { drinks: null, exercise: null, meeting: null, mood: null, note: "", planned: false }; }
+  function blankDraft() { return { drinks: null, exercise: null, meeting: null, mood: null, note: "", planned: false, plannedNote: "" }; }
+  function plannedGoalFor(k) {
+    for (var i = 0; i < db.goals.length; i++) { if (db.goals[i].date === k && db.goals[i].planned) return db.goals[i]; }
+    return null;
+  }
 
   function buildChips() {
     var wrap = document.getElementById("drinkChips");
@@ -1453,6 +1466,9 @@
     document.getElementById("mtYes").classList.toggle("on", draft.meeting === true);
     document.getElementById("mtNo").classList.toggle("on", draft.meeting === false);
     document.getElementById("plToggle").classList.toggle("on", draft.planned === true);
+    var pn = document.getElementById("plannedNote");
+    pn.style.display = draft.planned === true ? "" : "none";
+    if (pn.value !== draft.plannedNote) pn.value = draft.plannedNote || "";
   }
   function syncChips() {
     document.querySelectorAll("#drinkChips .chip").forEach(function (x) {
@@ -1470,7 +1486,12 @@
   function openSheet(k) {
     curKey = k;
     var existing = db.days[k];
-    draft = existing ? { drinks: existing.drinks, exercise: existing.exercise == null ? null : existing.exercise, meeting: existing.meeting == null ? null : existing.meeting, mood: existing.mood || null, note: existing.note || "", planned: existing.planned === true } : blankDraft();
+    draft = existing ? { drinks: existing.drinks, exercise: existing.exercise == null ? null : existing.exercise, meeting: existing.meeting == null ? null : existing.meeting, mood: existing.mood || null, note: existing.note || "", planned: existing.planned === true, plannedNote: existing.plannedNote || "" } : blankDraft();
+    // If this date was pre-marked as a planned drinking day in "Working toward", carry that over
+    if (!existing && db.mode === "cutback") {
+      var pg = plannedGoalFor(k);
+      if (pg) { draft.planned = true; draft.plannedNote = pg.label || ""; }
+    }
     var d = parseKey(k);
     var weekday = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][d.getDay()];
     document.getElementById("sheetTitle").textContent = existing ? "Edit day" : "Log a day";
@@ -1504,11 +1525,13 @@
   document.getElementById("mtYes").addEventListener("click", function () { draft.meeting = draft.meeting === true ? null : true; syncToggles(); });
   document.getElementById("mtNo").addEventListener("click", function () { draft.meeting = draft.meeting === false ? null : false; syncToggles(); });
   document.getElementById("plToggle").addEventListener("click", function () { draft.planned = !draft.planned; syncToggles(); });
+  document.getElementById("plannedNote").addEventListener("input", function () { draft.plannedNote = this.value; });
 
   document.getElementById("saveDay").addEventListener("click", function () {
     if (draft.drinks === null || !curKey) return;
     draft.note = document.getElementById("note").value.trim();
-    db.days[curKey] = { drinks: draft.drinks, exercise: draft.exercise, meeting: draft.meeting, mood: draft.mood, note: draft.note, planned: (draft.drinks >= 1 && draft.planned === true) };
+    var plannedDay = (draft.drinks >= 1 && draft.planned === true);
+    db.days[curKey] = { drinks: draft.drinks, exercise: draft.exercise, meeting: draft.meeting, mood: draft.mood, note: draft.note, planned: plannedDay, plannedNote: plannedDay ? (draft.plannedNote || "").trim() : "" };
     save();
     var dry = draft.drinks === 0;
     closeSheet();
@@ -1529,6 +1552,9 @@
     renderGoalList();
     document.getElementById("gLabel").value = "";
     document.getElementById("gDate").value = "";
+    var gp = document.getElementById("gPlanned");
+    gp.classList.remove("on");
+    gp.style.display = (db.mode === "cutback") ? "" : "none";
     document.getElementById("gOverlay").classList.add("on");
     document.getElementById("gSheet").classList.add("on");
   }
@@ -1543,24 +1569,27 @@
     db.goals.slice().sort(function (a, b) { return a.date < b.date ? -1 : 1; }).forEach(function (g) {
       var row = document.createElement("div");
       row.className = "grow";
-      row.innerHTML = '<div class="gl-info"><b>' + esc(g.label) + '</b><small>' + fmtDate(g.date) + ", " + parseKey(g.date).getFullYear() + '</small></div>';
+      row.innerHTML = '<div class="gl-info"><b>' + esc(g.label) + (g.planned ? " 📅" : "") + '</b><small>' + fmtDate(g.date) + ", " + parseKey(g.date).getFullYear() + (g.planned ? " · planned drinking day" : "") + '</small></div>';
       var del = document.createElement("button");
       del.className = "gl-del"; del.textContent = "Remove";
-      del.addEventListener("click", function () { db.goals = db.goals.filter(function (x) { return x.id !== g.id; }); save(); renderGoalList(); renderGoals(); });
+      del.addEventListener("click", function () { db.goals = db.goals.filter(function (x) { return x.id !== g.id; }); save(); renderGoalList(); renderGoals(); renderCalendar(); });
       row.appendChild(del);
       list.appendChild(row);
     });
   }
+  document.getElementById("gPlanned").addEventListener("click", function () { this.classList.toggle("on"); });
   document.getElementById("gAdd").addEventListener("click", function () {
     var label = document.getElementById("gLabel").value.trim();
     var date = document.getElementById("gDate").value;
     if (!label) { toast("Add a name for the date", false); return; }
     if (!date) { toast("Pick a date", false); return; }
-    db.goals.push({ id: Date.now() + "" + Math.floor(Math.random() * 999), label: label, date: date });
+    var planned = db.mode === "cutback" && document.getElementById("gPlanned").classList.contains("on");
+    db.goals.push({ id: Date.now() + "" + Math.floor(Math.random() * 999), label: label, date: date, planned: planned });
     save();
     document.getElementById("gLabel").value = "";
     document.getElementById("gDate").value = "";
-    renderGoalList(); renderGoals();
+    document.getElementById("gPlanned").classList.remove("on");
+    renderGoalList(); renderGoals(); renderCalendar();
     toast("Date added", false);
   });
   document.getElementById("gClose").addEventListener("click", closeGoalModal);
@@ -1718,6 +1747,17 @@
         html += '<div class="j-item j-ms" data-ms="' + d + '"><div class="j-head">' + (m ? m.name : d + " days") + '</div><div class="j-note">' + esc(mnotes[d]) + '</div></div>';
       });
     }
+    var planned = [];
+    for (var pk in db.days) { var pe = db.days[pk]; if (pe.planned && pe.drinks >= 1) planned.push({ date: pk, e: pe }); }
+    planned.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+    if (planned.length) {
+      html += '<div class="j-section">Planned days</div>';
+      planned.forEach(function (it) {
+        var occ = (it.e.plannedNote && it.e.plannedNote.trim()) ? esc(it.e.plannedNote) : "Planned day";
+        var dr = markText(it.e.drinks) + (it.e.drinks === 1 ? " drink" : " drinks");
+        html += '<div class="j-item j-planned" data-k="' + it.date + '"><div class="j-head">📅 ' + fmtLong(it.date) + ' <span class="j-tag">' + dr + '</span></div><div class="j-note">' + occ + '</div></div>';
+      });
+    }
     var items = [];
     for (var k in db.days) { var e = db.days[k]; if (e.note && e.note.trim()) items.push({ date: k, e: e }); }
     items.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
@@ -1728,7 +1768,8 @@
         if (typeof it.e.drinks === "number") tags.push(it.e.drinks === 0 ? "clear" : markText(it.e.drinks) + (it.e.drinks === 1 ? " drink" : " drinks"));
         if (it.e.exercise === true) tags.push("exercise");
         if (it.e.meeting === true) tags.push("meeting");
-        html += '<div class="j-item" data-k="' + it.date + '"><div class="j-head">' + fmtLong(it.date) + (tags.length ? ' <span class="j-tag">' + tags.join(" · ") + '</span>' : '') + '</div><div class="j-note">' + esc(it.e.note) + '</div></div>';
+        var pl = it.e.planned && it.e.drinks >= 1;
+        html += '<div class="j-item' + (pl ? " j-planned" : "") + '" data-k="' + it.date + '"><div class="j-head">' + (pl ? "📅 " : "") + fmtLong(it.date) + (tags.length ? ' <span class="j-tag">' + tags.join(" · ") + '</span>' : '') + '</div><div class="j-note">' + esc(it.e.note) + '</div></div>';
       });
     }
     if (!html) html = '<div class="goals-empty">No notes yet. Add a reflection when you log a day, or a note when you reach a milestone.</div>';
