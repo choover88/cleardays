@@ -718,6 +718,11 @@
     return currentStreak();
   }
   function streakStartKey() { return clearAnchor(); }
+  // The big hero number. Cutback: total clear days logged (numerator of the % fraction).
+  // Sobriety: consecutive clear days since your start/last slip.
+  function heroCount() {
+    return db.mode === "cutback" ? clearStats().clear : clearDays();
+  }
   // Cutback percentage: of the days you've logged since starting, how many were alcohol-free
   function clearStats() {
     var start = db.startDate, logged = 0, clear = 0, planned = 0;
@@ -786,8 +791,8 @@
   }
 
   function renderHero() {
-    var cd = clearDays();
     var cutback = db.mode === "cutback";
+    var cd = heroCount();
     document.getElementById("hero").classList.toggle("cutback", cutback);
     document.getElementById("heroNum").textContent = cd;
     document.getElementById("heroUnit").textContent = cd === 1 ? "clear day" : "clear days";
