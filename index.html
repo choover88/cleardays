@@ -50,6 +50,7 @@
     padding-bottom: 48px;
     -webkit-font-smoothing: antialiased;
   }
+  button, input, textarea, select, optgroup { font-family: var(--sans); }
   .wrap { max-width: 620px; margin: 0 auto; padding: 0 16px; }
 
   /* Header */
@@ -67,17 +68,17 @@
   /* Hero */
   .hero {
     margin-top: 16px;
-    background: linear-gradient(150deg, var(--blue) 0%, var(--blue-deep) 100%);
+    background: linear-gradient(150deg, #474e56 0%, #2f343a 100%);
     border-radius: var(--radius);
     padding: 14px;
     color: #fff;
-    box-shadow: 0 8px 22px -12px rgba(79,105,119,0.6);
+    box-shadow: 0 8px 22px -12px rgba(43,47,52,0.7);
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
     align-items: stretch;
   }
-  .hero-id { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: rgba(255,255,255,0.12); border-radius: 14px; padding: 12px 8px; }
+  .hero-id { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; background: rgba(105,122,149,0.58); border: 1px solid rgba(169,187,196,0.3); border-radius: 14px; padding: 12px 8px; }
   .hero-num { font-family: var(--brand); font-weight: 700; font-size: 50px; line-height: 1; }
   .hero-unit { font-size: 13px; opacity: 0.9; font-weight: 400; margin-top: 2px; }
   .hero-affirm { font-family: var(--sans); font-weight: 300; font-style: italic; font-size: 14.5px; opacity: 0.95; margin-top: 12px; line-height: 1.35; }
@@ -136,7 +137,7 @@
   .mcell.protect.future { opacity: 0.55; }
   .mcell .flags { position: absolute; bottom: 3px; display: flex; gap: 3px; }
   .mcell .flag { width: 6px; height: 6px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,0.9); }
-  .flag.ex { background: #2f8f7a; }
+  .flag.ex { background: var(--blue-light); }
   .flag.mt { background: var(--mauve); }
 
   /* tier fills (shared month + year) */
@@ -206,6 +207,8 @@
   .grabber { width: 40px; height: 4px; border-radius: 2px; background: var(--line); margin: 6px auto 12px; }
   .sheet h3 { font-family: var(--brand); font-weight: 700; font-size: 17px; color: var(--charcoal); }
   .sheet .s-date { font-size: 12.5px; color: var(--muted); margin-bottom: 16px; }
+  .sheet-x { position: absolute; top: 14px; right: 16px; width: 34px; height: 34px; border-radius: 50%; border: 0; background: var(--line-soft); color: var(--muted); font-size: 15px; line-height: 1; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 2; }
+  .sheet-x:active { background: var(--line); }
   .field-label { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.3px; margin: 16px 0 8px; text-transform: uppercase; }
 
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -263,7 +266,7 @@
   .hero-since .since-date { font-weight: 600; }
   .hero-since u { text-underline-offset: 2px; }
   /* pct donut box (bottom-left, cutback) */
-  .hero-pct { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: rgba(255,255,255,0.12); border-radius: 14px; padding: 12px 8px; }
+  .hero-pct { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; background: rgba(105,122,149,0.58); border: 1px solid rgba(169,187,196,0.3); border-radius: 14px; padding: 12px 8px; }
   .hero-pct .pct-cap { font-size: 11.5px; opacity: 0.92; text-align: center; line-height: 1.3; }
   .mode-toggle { display: flex; gap: 8px; margin-top: 4px; }
   .mode-toggle button { flex: 1; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--muted); cursor: pointer; }
@@ -286,7 +289,7 @@
   .hero-plant { display: flex; justify-content: center; align-items: center; background: #fff; border-radius: 14px; padding: 8px 6px; }
   .hero-plant svg { width: 100%; max-width: 130px; height: auto; display: block; }
   .hero-milestone { grid-column: 1 / -1; text-align: center; font-size: 12.5px; opacity: 0.95; padding: 9px 4px; border-top: 1px solid rgba(255,255,255,0.2); border-bottom: 1px solid rgba(255,255,255,0.2); }
-  .commit { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; width: 100%; background: rgba(255,255,255,0.12); border: 0; border-radius: 14px; padding: 14px 10px; cursor: pointer; color: #fff; text-align: center; font-family: var(--sans); }
+  .commit { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; width: 100%; background: rgba(105,122,149,0.58); border: 1px solid rgba(169,187,196,0.3); border-radius: 14px; padding: 14px 10px; cursor: pointer; color: #fff; text-align: center; font-family: var(--sans); }
   .hero:not(.cutback) .hero-pct { display: none; }
   .hero:not(.cutback) .commit { grid-column: 1 / -1; }
   .hero-protect { grid-column: 1 / -1; text-align: center; font-size: 12.5px; line-height: 1.4; background: rgba(255,255,255,0.16); border: 1px solid var(--protect); border-radius: 12px; padding: 10px 12px; }
@@ -453,6 +456,7 @@
 <div class="overlay" id="overlay"></div>
 <div class="sheet" id="sheet">
   <div class="grabber"></div>
+  <button class="sheet-x" id="sheetClose" type="button" aria-label="Close without saving">✕</button>
   <h3 id="sheetTitle">Log a day</h3>
   <div class="s-date" id="sheetDate"></div>
   <div class="sheet-protect" id="sheetProtect" style="display:none;"></div>
@@ -533,6 +537,13 @@
   <div class="s-date">The day your current clear stretch began — your count grows from here. You can also set a past date, or save a finished streak to your history before starting over.</div>
   <button class="meeting-link" id="openStartFromSettings" type="button" style="width:100%; text-align:left; cursor:pointer;">Set or change start date<span id="settingsStartHint">Not set</span></button>
 
+  <div class="field-label">Day-after window</div>
+  <div class="s-date">How many days after a planned drinking day stay marked as "days that matter." Minimum one week.</div>
+  <div class="setting-row" style="margin-top:8px;">
+    <input type="number" id="protectDaysInput" class="setting-date" min="7" max="60" step="1" inputmode="numeric" style="max-width:120px;" />
+    <span class="setting-hint">days after</span>
+  </div>
+
   <div class="field-label">Find a meeting</div>
   <div class="meetings" id="meetingsListSettings"></div>
   <div class="gform" style="margin-top: 8px;">
@@ -576,9 +587,9 @@
     <span class="setting-hint" id="startHint">Not set</span>
     <button class="linkbtn" id="clearStart">Clear date</button>
   </div>
-  <div id="startOverWrap" style="display:none;">
-    <div class="s-date" style="margin-top:14px; border-top:1px solid var(--line-soft); padding-top:14px;">Starting over? Save this streak to your history first — it keeps the number for good — then set your new start date above.</div>
-    <button class="btn" id="saveStreakBtn" type="button" style="width:100%; background:var(--teal); color:#fff; margin-top:8px;">Save this streak to history</button>
+  <div id="startOverWrap">
+    <div class="s-date" style="margin-top:14px; border-top:1px solid var(--line-soft); padding-top:14px;">Starting over? This saves your current streak to your history for good, then begins a fresh count from today. You can fine-tune the date above afterward.</div>
+    <button class="btn" id="saveStreakBtn" type="button" style="width:100%; background:var(--teal); color:#fff; margin-top:8px;">Start a fresh count today</button>
   </div>
   <div class="sheet-actions">
     <button class="btn btn-primary" id="closeStart" style="flex:1;">Done</button>
@@ -637,6 +648,7 @@
     if (!("lastSeenClear" in p)) p.lastSeenClear = null;
     if (!("mode" in p)) p.mode = "sobriety";
     if (!p.pastStreaks) p.pastStreaks = [];
+    if (!p.protectDays || p.protectDays < 7) p.protectDays = 7;
     return p;
   }
   function load() {
@@ -854,9 +866,8 @@
     document.getElementById("hero").classList.toggle("cutback", cutback);
     document.getElementById("heroNum").textContent = cd;
     document.getElementById("heroUnit").textContent = cd === 1 ? "clear day" : "clear days";
-    var ss = clearAnchor();
-    document.getElementById("heroSince").innerHTML = ss
-      ? "<span class=\"since-date\"><u>" + fmtLong(ss) + "</u></span>"
+    document.getElementById("heroSince").innerHTML = db.startDate
+      ? "<span class=\"since-date\"><u>" + fmtLong(db.startDate) + "</u></span>"
       : "<span class=\"since-date\"><u>set start date</u></span>";
     var pctEl = document.getElementById("heroPct");
     if (cutback) {
@@ -871,7 +882,7 @@
     var pIdx = cutback ? protectDayIndex(todayKey()) : 0;
     if (pIdx > 0) {
       hp.style.display = "";
-      hp.innerHTML = "<b>Day " + pIdx + " of 7 after a planned day.</b> This is the one that counts — keep it clear.";
+      hp.innerHTML = "<b>Day " + pIdx + " of " + protectWindow() + " after a planned day.</b> This is the one that counts — keep it clear.";
     } else {
       hp.style.display = "none";
       hp.innerHTML = "";
@@ -1501,10 +1512,12 @@
   // A protect day = a non-planned day with a planned day somewhere in the previous 7 days.
   // Consecutive planned days (a vacation) just push the window's start to the last of them;
   // a planned day landing inside a window restarts the 7 days from there.
+  function protectWindow() { return (db.protectDays && db.protectDays >= 7) ? db.protectDays : 7; }
   function protectDayIndex(k) {
     if (db.mode !== "cutback") return 0;
     if (isPlannedDay(k)) return 0;
-    for (var i = 1; i <= 7; i++) { if (isPlannedDay(addDays(k, -i))) return i; }
+    var n = protectWindow();
+    for (var i = 1; i <= n; i++) { if (isPlannedDay(addDays(k, -i))) return i; }
     return 0;
   }
   function isProtectDay(k) { return protectDayIndex(k) > 0; }
@@ -1611,7 +1624,7 @@
     var spIdx = protectDayIndex(k);
     if (spIdx > 0) {
       sp.style.display = "";
-      sp.innerHTML = "<b>This day matters.</b> It's day " + spIdx + " of 7 after a planned day — keep it clear.";
+      sp.innerHTML = "<b>This day matters.</b> It's day " + spIdx + " of " + protectWindow() + " after a planned day — keep it clear.";
     } else { sp.style.display = "none"; sp.innerHTML = ""; }
     syncChips(); syncToggles(); syncMoods(); refreshSaveBtn();
     document.getElementById("overlay").classList.add("on");
@@ -1669,6 +1682,7 @@
   });
 
   document.getElementById("overlay").addEventListener("click", closeSheet);
+  document.getElementById("sheetClose").addEventListener("click", closeSheet);
 
   // ---------- Goal modal ----------
   function openGoalModal() {
@@ -1724,12 +1738,21 @@
   function openSettings() {
     renderMode();
     document.getElementById("settingsStartHint").textContent = db.startDate ? fmtLong(db.startDate) : "Not set";
+    document.getElementById("protectDaysInput").value = protectWindow();
     document.getElementById("sOverlay").classList.add("on");
     document.getElementById("sSheet").classList.add("on");
   }
   document.getElementById("openStartFromSettings").addEventListener("click", function () {
     closeSettings();
     setTimeout(openStartDate, 180);
+  });
+  document.getElementById("protectDaysInput").addEventListener("change", function () {
+    var v = parseInt(this.value, 10);
+    if (isNaN(v) || v < 7) v = 7;
+    if (v > 60) v = 60;
+    this.value = v;
+    db.protectDays = v; save();
+    renderCalendar(); renderHero();
   });
   function renderMode() {
     document.getElementById("modeSobriety").classList.toggle("on", db.mode !== "cutback");
@@ -1765,11 +1788,10 @@
   }
   function refreshStartOver() {
     var rec = streakToSave();
-    var sw = document.getElementById("startOverWrap");
-    if (rec && rec.days > 0) {
-      sw.style.display = "";
-      document.getElementById("saveStreakBtn").textContent = "Save this " + rec.days + (rec.days === 1 ? " day" : " days") + " to history";
-    } else { sw.style.display = "none"; }
+    var btn = document.getElementById("saveStreakBtn");
+    btn.textContent = (rec && rec.days > 0)
+      ? "Save this " + rec.days + (rec.days === 1 ? " day" : " days") + " & start over"
+      : "Start a fresh count today";
   }
   document.getElementById("closeStart").addEventListener("click", closeStartDate);
   document.getElementById("dOverlay").addEventListener("click", closeStartDate);
@@ -1788,13 +1810,18 @@
   });
   document.getElementById("saveStreakBtn").addEventListener("click", function () {
     var rec = streakToSave();
-    if (!rec || rec.days <= 0) { toast("No streak to save yet", false); return; }
-    if (!db.pastStreaks) db.pastStreaks = [];
-    var dup = db.pastStreaks.some(function (x) { return x.from === rec.from && x.to === rec.to; });
-    if (dup) { toast("Already saved to history", false); return; }
-    db.pastStreaks.push({ id: Date.now() + "" + Math.floor(Math.random() * 999), days: rec.days, from: rec.from, to: rec.to, savedAt: todayKey() });
+    var saved = 0;
+    if (rec && rec.days > 0) {
+      if (!db.pastStreaks) db.pastStreaks = [];
+      var dup = db.pastStreaks.some(function (x) { return x.from === rec.from && x.to === rec.to; });
+      if (!dup) { db.pastStreaks.push({ id: Date.now() + "" + Math.floor(Math.random() * 999), days: rec.days, from: rec.from, to: rec.to, savedAt: todayKey() }); saved = rec.days; }
+    }
+    db.startDate = todayKey();
     save();
-    toast("Saved " + rec.days + (rec.days === 1 ? " day" : " days") + " to your history ✦", true);
+    document.getElementById("startDateInput").value = db.startDate;
+    document.getElementById("startHint").textContent = Math.max(0, daysSince(db.startDate)) + " days clear";
+    renderHero(); renderMilestones(); baselineMilestones(); refreshStartOver();
+    toast(saved ? ("Saved " + saved + (saved === 1 ? " day" : " days") + " ✦ Fresh start from today") : "Fresh start from today", true);
   });
   document.getElementById("closeSettings").addEventListener("click", closeSettings);
   document.getElementById("sOverlay").addEventListener("click", closeSettings);
