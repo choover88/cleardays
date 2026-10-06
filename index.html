@@ -32,8 +32,8 @@
     --line-soft: #eef1f3;
     --gray: #a8a7a5;
     --muted: #7c8894;
-    --protect: #5bb0a3;     /* day-after watch window — seafoam */
-    --protect-ink: #2c6a61; /* seafoam text on light */
+    --protect: #a9bbc4;     /* day-after watch window — muted light blue */
+    --protect-ink: #4f6977; /* muted blue text on light */
     --radius: 16px;
     --radius-sm: 11px;
     --sans: 'Poppins', system-ui, sans-serif;
@@ -340,13 +340,13 @@
   .j-head { font-weight: 600; font-size: 13px; color: var(--charcoal); margin-bottom: 3px; }
   .j-tag { font-weight: 400; font-size: 11px; color: var(--muted); }
   .j-note { font-size: 13.5px; color: var(--charcoal); line-height: 1.45; white-space: pre-wrap; }
-  .j-record { background: linear-gradient(160deg, #fff, rgba(91,176,163,0.16)); border: 1px solid var(--protect); border-radius: 12px; padding: 11px 13px; font-size: 13px; color: var(--charcoal); margin-bottom: 4px; }
+  .j-record { background: linear-gradient(160deg, #fff, rgba(169,187,196,0.22)); border: 1px solid var(--protect); border-radius: 12px; padding: 11px 13px; font-size: 13px; color: var(--charcoal); margin-bottom: 4px; }
   .j-record b { font-family: var(--brand); font-weight: 700; color: var(--protect-ink); }
   .j-item.j-streak { display: flex; align-items: center; justify-content: space-between; cursor: default; border-color: var(--teal); background: linear-gradient(160deg, #fff, rgba(34,92,99,0.07)); }
   .j-item.j-streak .j-head { margin-bottom: 0; }
   .j-del { border: 0; background: none; color: var(--berry); font-size: 12px; font-weight: 500; cursor: pointer; flex: 0 0 auto; padding: 2px 0 2px 10px; }
-  .pl-block { margin-top: 8px; font-size: 12.5px; line-height: 1.45; color: var(--protect-ink); background: rgba(91,176,163,0.14); border: 1px solid var(--protect); border-radius: 10px; padding: 9px 11px; }
-  .sheet-protect { margin: -2px 0 10px; font-size: 12.5px; line-height: 1.4; color: var(--protect-ink); background: rgba(91,176,163,0.14); border: 1px solid var(--protect); border-radius: 10px; padding: 9px 11px; text-align: center; }
+  .pl-block { margin-top: 8px; font-size: 12.5px; line-height: 1.45; color: var(--protect-ink); background: rgba(169,187,196,0.20); border: 1px solid var(--protect); border-radius: 10px; padding: 9px 11px; }
+  .sheet-protect { margin: -2px 0 10px; font-size: 12.5px; line-height: 1.4; color: var(--protect-ink); background: rgba(169,187,196,0.20); border: 1px solid var(--protect); border-radius: 10px; padding: 9px 11px; text-align: center; }
   .sheet-protect b { font-weight: 600; }
   #journalList { max-height: 60vh; overflow-y: auto; }
   .custom-drinks { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
@@ -528,6 +528,10 @@
     <button id="modeSobriety" type="button">Sobriety</button>
     <button id="modeCutback" type="button">Cutback</button>
   </div>
+
+  <div class="field-label">Clear start date</div>
+  <div class="s-date">The day your current clear stretch began — your count grows from here. You can also set a past date, or save a finished streak to your history before starting over.</div>
+  <button class="meeting-link" id="openStartFromSettings" type="button" style="width:100%; text-align:left; cursor:pointer;">Set or change start date<span id="settingsStartHint">Not set</span></button>
 
   <div class="field-label">Find a meeting</div>
   <div class="meetings" id="meetingsListSettings"></div>
@@ -1719,9 +1723,14 @@
   // ---------- Settings ----------
   function openSettings() {
     renderMode();
+    document.getElementById("settingsStartHint").textContent = db.startDate ? fmtLong(db.startDate) : "Not set";
     document.getElementById("sOverlay").classList.add("on");
     document.getElementById("sSheet").classList.add("on");
   }
+  document.getElementById("openStartFromSettings").addEventListener("click", function () {
+    closeSettings();
+    setTimeout(openStartDate, 180);
+  });
   function renderMode() {
     document.getElementById("modeSobriety").classList.toggle("on", db.mode !== "cutback");
     document.getElementById("modeCutback").classList.toggle("on", db.mode === "cutback");
@@ -1743,7 +1752,7 @@
 
   function openStartDate() {
     var inp = document.getElementById("startDateInput");
-    inp.max = todayKey();
+    inp.removeAttribute("max");
     inp.value = db.startDate || "";
     document.getElementById("startHint").textContent = db.startDate ? (Math.max(0, daysSince(db.startDate)) + " days clear") : "Using your logged streak";
     refreshStartOver();
