@@ -32,6 +32,7 @@
     --line-soft: #eef1f3;
     --gray: #a8a7a5;
     --muted: #7c8894;
+    --protect: #d99c3b;     /* day-after watch window */
     --radius: 16px;
     --radius-sm: 11px;
     --sans: 'Poppins', system-ui, sans-serif;
@@ -130,6 +131,8 @@
   .mcell.today { box-shadow: inset 0 0 0 2px var(--navy); }
   .mcell.planned::after { content: "📅"; position: absolute; top: 3px; right: 3px; font-size: 9px; line-height: 1; opacity: 0.95; }
   .mcell.future.planned { opacity: 0.6; }
+  .mcell.protect::before { content: ""; position: absolute; top: 50%; left: 50%; width: 27px; height: 27px; transform: translate(-50%, -50%); border: 1.5px solid var(--protect); border-radius: 50%; pointer-events: none; }
+  .mcell.protect.future { opacity: 0.55; }
   .mcell .flags { position: absolute; bottom: 3px; display: flex; gap: 3px; }
   .mcell .flag { width: 6px; height: 6px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,0.9); }
   .flag.ex { background: #2f8f7a; }
@@ -167,6 +170,7 @@
   .ycell.t-56 { background: var(--berry); }
   .ycell.t-7 { background: var(--plum); }
   .ycell.future { cursor: default; }
+  .ycell.yprotect { box-shadow: inset 0 0 0 1.5px var(--protect); }
   .ycell.today { box-shadow: inset 0 0 0 2px var(--navy); }
   /* perimeter outline that hugs the month shape */
   .ycell.eT { border-top: 3px solid var(--charcoal); }
@@ -284,6 +288,8 @@
   .commit { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; width: 100%; background: rgba(255,255,255,0.12); border: 0; border-radius: 14px; padding: 14px 10px; cursor: pointer; color: #fff; text-align: center; font-family: var(--sans); }
   .hero:not(.cutback) .hero-pct { display: none; }
   .hero:not(.cutback) .commit { grid-column: 1 / -1; }
+  .hero-protect { grid-column: 1 / -1; text-align: center; font-size: 12.5px; line-height: 1.4; background: rgba(255,255,255,0.16); border: 1px solid var(--protect); border-radius: 12px; padding: 10px 12px; }
+  .hero-protect b { font-weight: 600; }
   .commit:active { background: rgba(255,255,255,0.24); }
   .commit-box { width: 34px; height: 34px; border-radius: 9px; border: 2px solid rgba(255,255,255,0.8); flex: 0 0 auto; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--blue); font-weight: 700; }
   .commit-box.on { background: #fff; border-color: #fff; }
@@ -333,6 +339,12 @@
   .j-head { font-weight: 600; font-size: 13px; color: var(--charcoal); margin-bottom: 3px; }
   .j-tag { font-weight: 400; font-size: 11px; color: var(--muted); }
   .j-note { font-size: 13.5px; color: var(--charcoal); line-height: 1.45; white-space: pre-wrap; }
+  .j-record { background: linear-gradient(160deg, #fff, rgba(217,156,59,0.14)); border: 1px solid var(--protect); border-radius: 12px; padding: 11px 13px; font-size: 13px; color: var(--charcoal); margin-bottom: 4px; }
+  .j-record b { font-family: var(--brand); font-weight: 700; color: #a6701a; }
+  .j-item.j-streak { display: flex; align-items: center; justify-content: space-between; cursor: default; border-color: var(--teal); background: linear-gradient(160deg, #fff, rgba(34,92,99,0.07)); }
+  .j-item.j-streak .j-head { margin-bottom: 0; }
+  .j-del { border: 0; background: none; color: var(--berry); font-size: 12px; font-weight: 500; cursor: pointer; flex: 0 0 auto; padding: 2px 0 2px 10px; }
+  .pl-block { margin-top: 8px; font-size: 12.5px; line-height: 1.45; color: #8a6a1e; background: rgba(224,179,87,0.14); border: 1px solid #e0b357; border-radius: 10px; padding: 9px 11px; }
   #journalList { max-height: 60vh; overflow-y: auto; }
   .custom-drinks { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
   .custom-label { font-size: 13px; color: var(--muted); font-weight: 500; }
@@ -369,6 +381,7 @@
       <span class="commit-box" id="commitBox"></span>
       <span class="commit-text" id="commitText">Commit to a clear day</span>
     </button>
+    <div class="hero-protect" id="heroProtect" style="display:none;"></div>
   </div>
 
   <div class="mini-stats">
@@ -451,6 +464,7 @@
     <div class="field-label">Planned day</div>
     <button class="yn" id="plToggle" type="button" style="width:100%;"><span class="ic">📅</span> Planned day</button>
     <div class="s-date" style="margin-top:6px;">A holiday or event you planned for. It won't break your streak.</div>
+    <div class="pl-block" id="plBlock" style="display:none;">Planned days are set ahead of time. If today turned into a drinking day you didn't plan, that's okay — just log it as it was. It'll reset your count, and your day-after week starts fresh from here.</div>
     <input type="text" id="plannedNote" class="planned-note" placeholder="The occasion (optional)" maxlength="60" style="display:none;" />
   </div>
 
@@ -554,6 +568,10 @@
     <span class="setting-hint" id="startHint">Not set</span>
     <button class="linkbtn" id="clearStart">Clear date</button>
   </div>
+  <div id="startOverWrap" style="display:none;">
+    <div class="s-date" style="margin-top:14px; border-top:1px solid var(--line-soft); padding-top:14px;">Starting over? Save this streak to your history first — it keeps the number for good — then set your new start date above.</div>
+    <button class="btn" id="saveStreakBtn" type="button" style="width:100%; background:var(--teal); color:#fff; margin-top:8px;">Save this streak to history</button>
+  </div>
   <div class="sheet-actions">
     <button class="btn btn-primary" id="closeStart" style="flex:1;">Done</button>
   </div>
@@ -599,9 +617,7 @@
   ];
   var db = load();
 
-  function load() {
-    var p = null;
-    try { var raw = localStorage.getItem(KEY); if (raw) p = JSON.parse(raw); } catch (e) {}
+  function normalize(p) {
     if (!p || typeof p !== "object") p = {};
     if (!p.days) p.days = {};
     if (!p.goals) p.goals = [];
@@ -612,7 +628,13 @@
     if (!("milestoneInit" in p)) p.milestoneInit = false;
     if (!("lastSeenClear" in p)) p.lastSeenClear = null;
     if (!("mode" in p)) p.mode = "sobriety";
+    if (!p.pastStreaks) p.pastStreaks = [];
     return p;
+  }
+  function load() {
+    var p = null;
+    try { var raw = localStorage.getItem(KEY); if (raw) p = JSON.parse(raw); } catch (e) {}
+    return normalize(p);
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(db)); } catch (e) {} }
 
@@ -808,6 +830,15 @@
         : (pctDonut(0) + "<div class=\"pct-cap\">log days to see</div>");
     } else {
       pctEl.innerHTML = "";
+    }
+    var hp = document.getElementById("heroProtect");
+    var pIdx = cutback ? protectDayIndex(todayKey()) : 0;
+    if (pIdx > 0) {
+      hp.style.display = "";
+      hp.innerHTML = "<b>Day " + pIdx + " of 7 after a planned day.</b> This is the one that counts — keep it clear.";
+    } else {
+      hp.style.display = "none";
+      hp.innerHTML = "";
     }
     document.getElementById("heroPlant").innerHTML = plantSVG(cd);
     var nm = nextMilestone(cd);
@@ -1096,7 +1127,8 @@
       if (entry && typeof entry.drinks === "number") cls += " " + tierClass(entry.drinks);
       if (k === tk) cls += " today";
       if (future) cls += " future";
-      if (db.mode === "cutback" && ((entry && entry.planned && entry.drinks >= 1) || plannedGoalFor(k))) cls += " planned";
+      if (db.mode === "cutback" && isPlannedDay(k)) cls += " planned";
+      else if (db.mode === "cutback" && isProtectDay(k)) cls += " protect";
       cell.className = cls;
       var html = '<div class="dnum">' + d + "</div>";
       if (entry && typeof entry.drinks === "number") html += '<div class="dmark">' + markText(entry.drinks) + "</div>";
@@ -1159,6 +1191,7 @@
         var cls = ["ycell"];
         if (entry && typeof entry.drinks === "number") { cls.push(tierClass(entry.drinks)); mark = markText(entry.drinks); }
         if (future) cls.push("future");
+        if (db.mode === "cutback" && isProtectDay(k)) cls.push("yprotect");
         if (k === tk) cls.push("today");
         var col = j % 7;
         if (!real(j - 7)) cls.push("eT");
@@ -1421,6 +1454,36 @@
     for (var i = 0; i < db.goals.length; i++) { if (db.goals[i].date === k && db.goals[i].planned) return db.goals[i]; }
     return null;
   }
+  // ---------- Day-after (protect) window: the 7 days following a planned drinking day ----------
+  // A planned day = a logged planned drinking day, or a date pre-marked planned in "Working toward".
+  function isPlannedDay(k) {
+    var e = db.days[k];
+    if (e && e.planned === true && typeof e.drinks === "number" && e.drinks >= 1) return true;
+    if (plannedGoalFor(k)) return true;
+    return false;
+  }
+  // A protect day = a non-planned day with a planned day somewhere in the previous 7 days.
+  // Consecutive planned days (a vacation) just push the window's start to the last of them;
+  // a planned day landing inside a window restarts the 7 days from there.
+  function protectDayIndex(k) {
+    if (db.mode !== "cutback") return 0;
+    if (isPlannedDay(k)) return 0;
+    for (var i = 1; i <= 7; i++) { if (isPlannedDay(addDays(k, -i))) return i; }
+    return 0;
+  }
+  function isProtectDay(k) { return protectDayIndex(k) > 0; }
+  // How reliably clear days were held during protect windows (logged, up to today).
+  function protectStats() {
+    var held = 0, total = 0, tk = todayKey();
+    for (var key in db.days) {
+      if (key > tk) continue;
+      var e = db.days[key];
+      if (typeof e.drinks !== "number") continue;
+      if (!isProtectDay(key)) continue;
+      total++; if (e.drinks === 0) held++;
+    }
+    return { held: held, total: total };
+  }
 
   function buildChips() {
     var wrap = document.getElementById("drinkChips");
@@ -1507,6 +1570,7 @@
     document.getElementById("note").value = draft.note;
     document.getElementById("clearDay").style.display = existing ? "" : "none";
     document.getElementById("plannedBlock").style.display = (db.mode === "cutback") ? "" : "none";
+    document.getElementById("plBlock").style.display = "none";
     syncChips(); syncToggles(); syncMoods(); refreshSaveBtn();
     document.getElementById("overlay").classList.add("on");
     document.getElementById("sheet").classList.add("on");
@@ -1532,7 +1596,16 @@
   document.getElementById("exNo").addEventListener("click", function () { draft.exercise = draft.exercise === false ? null : false; syncToggles(); });
   document.getElementById("mtYes").addEventListener("click", function () { draft.meeting = draft.meeting === true ? null : true; syncToggles(); });
   document.getElementById("mtNo").addEventListener("click", function () { draft.meeting = draft.meeting === false ? null : false; syncToggles(); });
-  document.getElementById("plToggle").addEventListener("click", function () { draft.planned = !draft.planned; syncToggles(); });
+  document.getElementById("plToggle").addEventListener("click", function () {
+    // Planned has to mean planned-ahead. Marking today or a past day as planned is a slip
+    // being written off, so only allow it on a future date.
+    if (draft.planned !== true && (!curKey || curKey <= todayKey())) {
+      document.getElementById("plBlock").style.display = "";
+      return;
+    }
+    document.getElementById("plBlock").style.display = "none";
+    draft.planned = !draft.planned; syncToggles();
+  });
   document.getElementById("plannedNote").addEventListener("input", function () { draft.plannedNote = this.value; });
 
   document.getElementById("saveDay").addEventListener("click", function () {
@@ -1592,6 +1665,7 @@
     if (!label) { toast("Add a name for the date", false); return; }
     if (!date) { toast("Pick a date", false); return; }
     var planned = db.mode === "cutback" && document.getElementById("gPlanned").classList.contains("on");
+    if (planned && date <= todayKey()) { toast("Planned days have to be a future date", false); return; }
     db.goals.push({ id: Date.now() + "" + Math.floor(Math.random() * 999), label: label, date: date, planned: planned });
     save();
     document.getElementById("gLabel").value = "";
@@ -1634,6 +1708,12 @@
     inp.max = todayKey();
     inp.value = db.startDate || "";
     document.getElementById("startHint").textContent = db.startDate ? (Math.max(0, daysSince(db.startDate)) + " days clear") : "Using your logged streak";
+    var cdNow = clearDays();
+    var sw = document.getElementById("startOverWrap");
+    if (cdNow > 0) {
+      sw.style.display = "";
+      document.getElementById("saveStreakBtn").textContent = "Save this " + cdNow + (cdNow === 1 ? " day" : " days") + " to history";
+    } else { sw.style.display = "none"; }
     document.getElementById("dOverlay").classList.add("on");
     document.getElementById("dSheet").classList.add("on");
   }
@@ -1654,6 +1734,23 @@
     document.getElementById("startDateInput").value = "";
     document.getElementById("startHint").textContent = "Using your logged streak";
     renderHero(); renderMilestones(); baselineMilestones();
+    var cdNow = clearDays();
+    var sw = document.getElementById("startOverWrap");
+    if (cdNow > 0) { sw.style.display = ""; document.getElementById("saveStreakBtn").textContent = "Save this " + cdNow + (cdNow === 1 ? " day" : " days") + " to history"; }
+    else { sw.style.display = "none"; }
+  });
+  document.getElementById("saveStreakBtn").addEventListener("click", function () {
+    var cd = clearDays();
+    if (cd <= 0) { toast("No streak to save yet", false); return; }
+    var anchor = clearAnchor();
+    if (!anchor) { toast("Set a start date first", false); return; }
+    var to = todayKey();
+    if (!db.pastStreaks) db.pastStreaks = [];
+    var last = db.pastStreaks[db.pastStreaks.length - 1];
+    if (last && last.from === anchor && last.to === to) { toast("Already saved to history", false); return; }
+    db.pastStreaks.push({ id: Date.now() + "" + Math.floor(Math.random() * 999), days: cd, from: anchor, to: to, savedAt: to });
+    save();
+    toast("Saved " + cd + (cd === 1 ? " day" : " days") + " to your history ✦", true);
   });
   document.getElementById("closeSettings").addEventListener("click", closeSettings);
   document.getElementById("sOverlay").addEventListener("click", closeSettings);
@@ -1686,7 +1783,7 @@
       try { p = JSON.parse(r.result); } catch (e) { toast("Could not read that file", false); return; }
       if (!p || typeof p !== "object" || !p.days) { toast("That backup didn't look right", false); return; }
       if (!confirm("Replace your current entries with this backup?")) return;
-      db = { days: p.days || {}, goals: p.goals || [], startDate: p.startDate || null, commitDate: p.commitDate || null };
+      db = normalize(p);
       save();
       renderAll();
       closeSettings();
@@ -1746,6 +1843,21 @@
   document.getElementById("jOverlay").addEventListener("click", closeJournal);
   function renderJournal() {
     var html = "";
+    if (db.mode === "cutback") {
+      var pstat = protectStats();
+      if (pstat.total > 0) {
+        html += '<div class="j-record">Days-after held clear · <b>' + pstat.held + " / " + pstat.total + "</b></div>";
+      }
+    }
+    var streaks = (db.pastStreaks || []).slice().sort(function (a, b) { return a.to < b.to ? 1 : -1; });
+    if (streaks.length) {
+      html += '<div class="j-section">Past streaks</div>';
+      streaks.forEach(function (s) {
+        html += '<div class="j-item j-streak"><div class="j-head">' + s.days + (s.days === 1 ? " day" : " days") +
+          ' <span class="j-tag">' + fmtLong(s.from) + " – " + fmtLong(s.to) + '</span></div>' +
+          '<button class="j-del" data-sid="' + s.id + '">Remove</button></div>';
+      });
+    }
     var mnotes = db.milestoneNotes || {};
     var mkeys = Object.keys(mnotes).filter(function (d) { return mnotes[d] && ("" + mnotes[d]).trim(); });
     if (mkeys.length) {
@@ -1788,6 +1900,14 @@
     });
     Array.prototype.forEach.call(wrap.querySelectorAll(".j-item[data-ms]"), function (el) {
       el.addEventListener("click", function () { var d = +el.getAttribute("data-ms"); var m = MILESTONES.filter(function (x) { return x.d === d; })[0]; if (m) { closeJournal(); openMilestone(m, clearDays() >= d); } });
+    });
+    Array.prototype.forEach.call(wrap.querySelectorAll(".j-del[data-sid]"), function (el) {
+      el.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        var sid = el.getAttribute("data-sid");
+        db.pastStreaks = (db.pastStreaks || []).filter(function (x) { return x.id !== sid; });
+        save(); renderJournal();
+      });
     });
   }
 
