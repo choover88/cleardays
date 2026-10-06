@@ -32,7 +32,8 @@
     --line-soft: #eef1f3;
     --gray: #a8a7a5;
     --muted: #7c8894;
-    --protect: #d99c3b;     /* day-after watch window */
+    --protect: #5bb0a3;     /* day-after watch window — seafoam */
+    --protect-ink: #2c6a61; /* seafoam text on light */
     --radius: 16px;
     --radius-sm: 11px;
     --sans: 'Poppins', system-ui, sans-serif;
@@ -131,7 +132,7 @@
   .mcell.today { box-shadow: inset 0 0 0 2px var(--navy); }
   .mcell.planned::after { content: "📅"; position: absolute; top: 3px; right: 3px; font-size: 9px; line-height: 1; opacity: 0.95; }
   .mcell.future.planned { opacity: 0.6; }
-  .mcell.protect::before { content: ""; position: absolute; top: 50%; left: 50%; width: 27px; height: 27px; transform: translate(-50%, -50%); border: 1.5px solid var(--protect); border-radius: 50%; pointer-events: none; }
+  .mcell.protect::before { content: ""; position: absolute; top: 50%; left: 50%; width: 82%; height: 82%; max-width: 40px; max-height: 40px; transform: translate(-50%, -50%); border: 2px solid var(--protect); border-radius: 50%; pointer-events: none; }
   .mcell.protect.future { opacity: 0.55; }
   .mcell .flags { position: absolute; bottom: 3px; display: flex; gap: 3px; }
   .mcell .flag { width: 6px; height: 6px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,0.9); }
@@ -339,12 +340,14 @@
   .j-head { font-weight: 600; font-size: 13px; color: var(--charcoal); margin-bottom: 3px; }
   .j-tag { font-weight: 400; font-size: 11px; color: var(--muted); }
   .j-note { font-size: 13.5px; color: var(--charcoal); line-height: 1.45; white-space: pre-wrap; }
-  .j-record { background: linear-gradient(160deg, #fff, rgba(217,156,59,0.14)); border: 1px solid var(--protect); border-radius: 12px; padding: 11px 13px; font-size: 13px; color: var(--charcoal); margin-bottom: 4px; }
-  .j-record b { font-family: var(--brand); font-weight: 700; color: #a6701a; }
+  .j-record { background: linear-gradient(160deg, #fff, rgba(91,176,163,0.16)); border: 1px solid var(--protect); border-radius: 12px; padding: 11px 13px; font-size: 13px; color: var(--charcoal); margin-bottom: 4px; }
+  .j-record b { font-family: var(--brand); font-weight: 700; color: var(--protect-ink); }
   .j-item.j-streak { display: flex; align-items: center; justify-content: space-between; cursor: default; border-color: var(--teal); background: linear-gradient(160deg, #fff, rgba(34,92,99,0.07)); }
   .j-item.j-streak .j-head { margin-bottom: 0; }
   .j-del { border: 0; background: none; color: var(--berry); font-size: 12px; font-weight: 500; cursor: pointer; flex: 0 0 auto; padding: 2px 0 2px 10px; }
-  .pl-block { margin-top: 8px; font-size: 12.5px; line-height: 1.45; color: #8a6a1e; background: rgba(224,179,87,0.14); border: 1px solid #e0b357; border-radius: 10px; padding: 9px 11px; }
+  .pl-block { margin-top: 8px; font-size: 12.5px; line-height: 1.45; color: var(--protect-ink); background: rgba(91,176,163,0.14); border: 1px solid var(--protect); border-radius: 10px; padding: 9px 11px; }
+  .sheet-protect { margin: -2px 0 10px; font-size: 12.5px; line-height: 1.4; color: var(--protect-ink); background: rgba(91,176,163,0.14); border: 1px solid var(--protect); border-radius: 10px; padding: 9px 11px; text-align: center; }
+  .sheet-protect b { font-weight: 600; }
   #journalList { max-height: 60vh; overflow-y: auto; }
   .custom-drinks { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
   .custom-label { font-size: 13px; color: var(--muted); font-weight: 500; }
@@ -452,6 +455,7 @@
   <div class="grabber"></div>
   <h3 id="sheetTitle">Log a day</h3>
   <div class="s-date" id="sheetDate"></div>
+  <div class="sheet-protect" id="sheetProtect" style="display:none;"></div>
 
   <div class="field-label">Drinks</div>
   <div class="chips" id="drinkChips"></div>
@@ -464,7 +468,7 @@
     <div class="field-label">Planned day</div>
     <button class="yn" id="plToggle" type="button" style="width:100%;"><span class="ic">📅</span> Planned day</button>
     <div class="s-date" style="margin-top:6px;">A holiday or event you planned for. It won't break your streak.</div>
-    <div class="pl-block" id="plBlock" style="display:none;">Planned days are set ahead of time. If today turned into a drinking day you didn't plan, that's okay — just log it as it was. It'll reset your count, and your day-after week starts fresh from here.</div>
+    <div class="pl-block" id="plBlock" style="display:none;">Planned days are set ahead of time. If today turned into a drinking day you didn't plan, that's okay — just log it as it was.</div>
     <input type="text" id="plannedNote" class="planned-note" placeholder="The occasion (optional)" maxlength="60" style="display:none;" />
   </div>
 
@@ -740,6 +744,34 @@
     return currentStreak();
   }
   function streakStartKey() { return clearAnchor(); }
+  // Every logged day that broke a streak, oldest first.
+  function allSlipKeys() {
+    var a = [];
+    for (var k in db.days) { if (isSlip(db.days[k])) a.push(k); }
+    a.sort();
+    return a;
+  }
+  // The streak that most recently ended at a slip (for saving to history after you've already logged the slip).
+  function lastCompletedStreak() {
+    var slips = allSlipKeys();
+    if (!slips.length) return null;
+    var S = slips[slips.length - 1];
+    var endKey = addDays(S, -1);
+    var prevS = slips.length >= 2 ? slips[slips.length - 2] : null;
+    var startKey = prevS ? addDays(prevS, 1) : (db.startDate || null);
+    if (!startKey) { var keys = Object.keys(db.days).sort(); startKey = keys.length ? keys[0] : endKey; }
+    if (db.startDate && startKey < db.startDate) startKey = db.startDate;
+    if (startKey > endKey) return null;
+    var days = Math.floor((parseKey(S) - parseKey(startKey)) / 86400000);
+    if (days <= 0) return null;
+    return { days: days, from: startKey, to: endKey };
+  }
+  // What "Save this streak" will capture: the current running streak, or the last one that ended.
+  function streakToSave() {
+    var cur = clearDays();
+    if (cur > 0) { var a = clearAnchor(); if (a) return { days: cur, from: a, to: todayKey() }; }
+    return lastCompletedStreak();
+  }
   // The big hero number. Cutback: total clear days logged (numerator of the % fraction).
   // Sobriety: consecutive clear days since your start/last slip.
   function heroCount() {
@@ -1571,6 +1603,12 @@
     document.getElementById("clearDay").style.display = existing ? "" : "none";
     document.getElementById("plannedBlock").style.display = (db.mode === "cutback") ? "" : "none";
     document.getElementById("plBlock").style.display = "none";
+    var sp = document.getElementById("sheetProtect");
+    var spIdx = protectDayIndex(k);
+    if (spIdx > 0) {
+      sp.style.display = "";
+      sp.innerHTML = "<b>This day matters.</b> It's day " + spIdx + " of 7 after a planned day — keep it clear.";
+    } else { sp.style.display = "none"; sp.innerHTML = ""; }
     syncChips(); syncToggles(); syncMoods(); refreshSaveBtn();
     document.getElementById("overlay").classList.add("on");
     document.getElementById("sheet").classList.add("on");
@@ -1708,18 +1746,21 @@
     inp.max = todayKey();
     inp.value = db.startDate || "";
     document.getElementById("startHint").textContent = db.startDate ? (Math.max(0, daysSince(db.startDate)) + " days clear") : "Using your logged streak";
-    var cdNow = clearDays();
-    var sw = document.getElementById("startOverWrap");
-    if (cdNow > 0) {
-      sw.style.display = "";
-      document.getElementById("saveStreakBtn").textContent = "Save this " + cdNow + (cdNow === 1 ? " day" : " days") + " to history";
-    } else { sw.style.display = "none"; }
+    refreshStartOver();
     document.getElementById("dOverlay").classList.add("on");
     document.getElementById("dSheet").classList.add("on");
   }
   function closeStartDate() {
     document.getElementById("dOverlay").classList.remove("on");
     document.getElementById("dSheet").classList.remove("on");
+  }
+  function refreshStartOver() {
+    var rec = streakToSave();
+    var sw = document.getElementById("startOverWrap");
+    if (rec && rec.days > 0) {
+      sw.style.display = "";
+      document.getElementById("saveStreakBtn").textContent = "Save this " + rec.days + (rec.days === 1 ? " day" : " days") + " to history";
+    } else { sw.style.display = "none"; }
   }
   document.getElementById("closeStart").addEventListener("click", closeStartDate);
   document.getElementById("dOverlay").addEventListener("click", closeStartDate);
@@ -1734,23 +1775,17 @@
     document.getElementById("startDateInput").value = "";
     document.getElementById("startHint").textContent = "Using your logged streak";
     renderHero(); renderMilestones(); baselineMilestones();
-    var cdNow = clearDays();
-    var sw = document.getElementById("startOverWrap");
-    if (cdNow > 0) { sw.style.display = ""; document.getElementById("saveStreakBtn").textContent = "Save this " + cdNow + (cdNow === 1 ? " day" : " days") + " to history"; }
-    else { sw.style.display = "none"; }
+    refreshStartOver();
   });
   document.getElementById("saveStreakBtn").addEventListener("click", function () {
-    var cd = clearDays();
-    if (cd <= 0) { toast("No streak to save yet", false); return; }
-    var anchor = clearAnchor();
-    if (!anchor) { toast("Set a start date first", false); return; }
-    var to = todayKey();
+    var rec = streakToSave();
+    if (!rec || rec.days <= 0) { toast("No streak to save yet", false); return; }
     if (!db.pastStreaks) db.pastStreaks = [];
-    var last = db.pastStreaks[db.pastStreaks.length - 1];
-    if (last && last.from === anchor && last.to === to) { toast("Already saved to history", false); return; }
-    db.pastStreaks.push({ id: Date.now() + "" + Math.floor(Math.random() * 999), days: cd, from: anchor, to: to, savedAt: to });
+    var dup = db.pastStreaks.some(function (x) { return x.from === rec.from && x.to === rec.to; });
+    if (dup) { toast("Already saved to history", false); return; }
+    db.pastStreaks.push({ id: Date.now() + "" + Math.floor(Math.random() * 999), days: rec.days, from: rec.from, to: rec.to, savedAt: todayKey() });
     save();
-    toast("Saved " + cd + (cd === 1 ? " day" : " days") + " to your history ✦", true);
+    toast("Saved " + rec.days + (rec.days === 1 ? " day" : " days") + " to your history ✦", true);
   });
   document.getElementById("closeSettings").addEventListener("click", closeSettings);
   document.getElementById("sOverlay").addEventListener("click", closeSettings);
