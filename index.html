@@ -211,8 +211,8 @@
   .sheet-x:active { background: var(--line); }
   .field-label { font-size: 12px; font-weight: 500; color: var(--muted); letter-spacing: 0.3px; margin: 16px 0 8px; text-transform: uppercase; }
 
-  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip { min-width: 42px; height: 42px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: #fff; font-family: var(--sans); font-size: 14px; font-weight: 500; color: var(--charcoal); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: all 0.12s; }
+  .chips { display: grid; grid-template-columns: repeat(8, 1fr); gap: 5px; }
+  .chip { width: 100%; height: 46px; padding: 0; border-radius: 10px; border: 1px solid var(--line); background: #fff; font-family: var(--sans); font-size: 13.5px; font-weight: 500; color: var(--charcoal); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 1px; transition: all 0.12s; }
   .chip.zero { border-color: rgba(105,122,149,0.5); color: var(--blue); }
   .chip.sel { transform: translateY(-1px); }
   .chip.sel.zero { background: var(--blue); border-color: var(--blue); color: #fff; }
@@ -226,9 +226,15 @@
   .yn.on { background: var(--blue); border-color: var(--blue); color: #fff; }
   .yn .ic { font-size: 16px; }
 
-  .moods { display: flex; gap: 7px; }
+  .moods { display: flex; gap: 7px; justify-content: center; }
   .mood { flex: 1; aspect-ratio: 1; max-width: 58px; border-radius: 12px; border: 1px solid var(--line); background: #fff; cursor: pointer; font-size: 22px; display: flex; align-items: center; justify-content: center; }
   .mood.on { border-color: var(--blue); background: rgba(105,122,149,0.1); transform: translateY(-1px); }
+  .feelings { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+  .feeling { border-radius: 12px; border: 1px solid var(--line); background: #fff; cursor: pointer; padding: 9px 2px 7px; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 3px; min-height: 62px; }
+  .feeling .fe-emoji { font-size: 20px; line-height: 1; }
+  .feeling .fe-label { font-family: var(--sans); font-size: 10px; font-weight: 500; color: var(--muted); text-align: center; line-height: 1.15; }
+  .feeling.on { border-color: var(--blue); background: rgba(105,122,149,0.1); }
+  .feeling.on .fe-label { color: var(--blue-deep); }
 
   textarea { width: 100%; min-height: 70px; border: 1px solid var(--line); border-radius: 12px; padding: 11px 13px; font-family: var(--sans); font-size: 14px; color: var(--ink); resize: vertical; background: #fdfdfd; }
   textarea:focus { outline: none; border-color: var(--blue); }
@@ -274,7 +280,7 @@
   .planned-note { width: 100%; height: 44px; border: 1px solid var(--line); border-radius: 12px; padding: 0 13px; font-family: var(--sans); font-size: 14px; color: var(--ink); background: #fdfdfd; margin-top: 8px; }
   .planned-note:focus { outline: none; border-color: var(--blue); }
   /* settings controls */
-  .setting-date { width: 100%; height: 46px; border: 1px solid var(--line); border-radius: 12px; padding: 0 13px; font-family: var(--sans); font-size: 14px; color: var(--ink); background: #fdfdfd; }
+  .setting-date { width: 100%; max-width: 100%; min-width: 0; height: 46px; border: 1px solid var(--line); border-radius: 12px; padding: 0 13px; font-family: var(--sans); font-size: 14px; color: var(--ink); background: #fdfdfd; -webkit-appearance: none; appearance: none; display: block; }
   .setting-date:focus { outline: none; border-color: var(--blue); }
   .setting-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
   .setting-hint { font-size: 12.5px; color: var(--muted); }
@@ -328,7 +334,7 @@
   .b-plant svg { width: 52px; height: auto; display: block; }
   .badge:not(.earned) .b-plant { filter: grayscale(0.65); }
   .mtg-del { border: 0; background: none; color: var(--berry); font-size: 12.5px; font-weight: 500; cursor: pointer; flex: 0 0 auto; }
-  .commit.done { background: rgba(166,208,196,0.28); }
+  .commit.done { background: rgba(138,127,162,0.5); border-color: rgba(169,187,196,0.3); }
   @keyframes pop { 0% { transform: scale(0.5); } 55% { transform: scale(1.3); } 100% { transform: scale(1); } }
   .commit-box.pop { animation: pop 0.5s cubic-bezier(.2,.8,.2,1); }
   .ms-detail-plant { display: flex; justify-content: center; margin: 4px 0 10px; }
@@ -492,6 +498,9 @@
   <div class="field-label">Mood</div>
   <div class="moods" id="moods"></div>
 
+  <div class="field-label">Feeling <span style="text-transform:none;font-weight:400;">· optional</span></div>
+  <div class="feelings" id="feelings"></div>
+
   <div class="field-label">Reflection <span style="text-transform:none;font-weight:400;">· optional</span></div>
   <textarea id="note" placeholder="A note for future you..."></textarea>
 
@@ -570,6 +579,8 @@
     <button class="btn btn-primary" id="importBtn" style="flex: 1; background: var(--blue-deep);">Restore</button>
   </div>
   <input type="file" id="importFile" accept="application/json,.json" style="display: none;" />
+  <button class="btn btn-primary" id="csvBtn" type="button" style="width:100%; margin-top:8px; background: var(--teal);">Export spreadsheet (CSV)</button>
+  <div class="s-date" style="margin-top:6px;">One row per logged day — date, drinks, clear, planned, day-after, exercise, meeting, mood, each feeling, and your note. Opens in Excel or Google Sheets for charts and trends.</div>
 
   <div class="sheet-actions">
     <button class="btn btn-primary" id="closeSettings" style="flex:1;">Done</button>
@@ -1496,7 +1507,7 @@
   // ---------- Entry sheet ----------
   var curKey = null, draft = null;
 
-  function blankDraft() { return { drinks: null, exercise: null, meeting: null, mood: null, note: "", planned: false, plannedNote: "" }; }
+  function blankDraft() { return { drinks: null, exercise: null, meeting: null, mood: null, feelings: [], note: "", planned: false, plannedNote: "" }; }
   function plannedGoalFor(k) {
     for (var i = 0; i < db.goals.length; i++) { if (db.goals[i].date === k && db.goals[i].planned) return db.goals[i]; }
     return null;
@@ -1580,6 +1591,43 @@
       el.classList.toggle("on", +el.getAttribute("data-mood") === draft.mood);
     });
   }
+  var FEELINGS = [
+    { key: "irritable", emoji: "😤", label: "Irritable" },
+    { key: "motivated", emoji: "💪", label: "Motivated" },
+    { key: "tired", emoji: "😴", label: "Tired" },
+    { key: "anxious", emoji: "😰", label: "Anxious" },
+    { key: "emotional", emoji: "😢", label: "Emotional" }
+  ];
+  // Back-compat: old entries stored a single `feeling`; everything now uses a `feelings` array.
+  function feelingsOf(e) {
+    if (Array.isArray(e.feelings)) return e.feelings;
+    if (e.feeling) return [e.feeling];
+    return [];
+  }
+  function buildFeelings() {
+    var wrap = document.getElementById("feelings");
+    wrap.innerHTML = "";
+    FEELINGS.forEach(function (f) {
+      var el = document.createElement("button");
+      el.className = "feeling"; el.type = "button"; el.setAttribute("data-feeling", f.key);
+      el.innerHTML = '<span class="fe-emoji">' + f.emoji + '</span><span class="fe-label">' + f.label + '</span>';
+      el.addEventListener("click", function () {
+        var i = draft.feelings.indexOf(f.key);
+        if (i >= 0) draft.feelings.splice(i, 1); else draft.feelings.push(f.key);
+        syncFeelings();
+      });
+      wrap.appendChild(el);
+    });
+  }
+  function syncFeelings() {
+    document.querySelectorAll("#feelings .feeling").forEach(function (el) {
+      el.classList.toggle("on", draft.feelings.indexOf(el.getAttribute("data-feeling")) >= 0);
+    });
+  }
+  function feelingLabel(key) {
+    for (var i = 0; i < FEELINGS.length; i++) { if (FEELINGS[i].key === key) return FEELINGS[i].label; }
+    return key;
+  }
   function syncToggles() {
     document.getElementById("exYes").classList.toggle("on", draft.exercise === true);
     document.getElementById("exNo").classList.toggle("on", draft.exercise === false);
@@ -1606,7 +1654,7 @@
   function openSheet(k) {
     curKey = k;
     var existing = db.days[k];
-    draft = existing ? { drinks: existing.drinks, exercise: existing.exercise == null ? null : existing.exercise, meeting: existing.meeting == null ? null : existing.meeting, mood: existing.mood || null, note: existing.note || "", planned: existing.planned === true, plannedNote: existing.plannedNote || "" } : blankDraft();
+    draft = existing ? { drinks: existing.drinks, exercise: existing.exercise == null ? null : existing.exercise, meeting: existing.meeting == null ? null : existing.meeting, mood: existing.mood || null, feelings: feelingsOf(existing).slice(), note: existing.note || "", planned: existing.planned === true, plannedNote: existing.plannedNote || "" } : blankDraft();
     // If this date was pre-marked as a planned drinking day in "Working toward", carry that over
     if (!existing && db.mode === "cutback") {
       var pg = plannedGoalFor(k);
@@ -1626,7 +1674,7 @@
       sp.style.display = "";
       sp.innerHTML = "<b>This day matters.</b> It's day " + spIdx + " of " + protectWindow() + " after a planned day — keep it clear.";
     } else { sp.style.display = "none"; sp.innerHTML = ""; }
-    syncChips(); syncToggles(); syncMoods(); refreshSaveBtn();
+    syncChips(); syncToggles(); syncMoods(); syncFeelings(); refreshSaveBtn();
     document.getElementById("overlay").classList.add("on");
     document.getElementById("sheet").classList.add("on");
   }
@@ -1667,7 +1715,7 @@
     if (draft.drinks === null || !curKey) return;
     draft.note = document.getElementById("note").value.trim();
     var plannedDay = (draft.drinks >= 1 && draft.planned === true);
-    db.days[curKey] = { drinks: draft.drinks, exercise: draft.exercise, meeting: draft.meeting, mood: draft.mood, note: draft.note, planned: plannedDay, plannedNote: plannedDay ? (draft.plannedNote || "").trim() : "" };
+    db.days[curKey] = { drinks: draft.drinks, exercise: draft.exercise, meeting: draft.meeting, mood: draft.mood, feelings: draft.feelings.slice(), note: draft.note, planned: plannedDay, plannedNote: plannedDay ? (draft.plannedNote || "").trim() : "" };
     save();
     var dry = draft.drinks === 0;
     closeSheet();
@@ -1841,6 +1889,62 @@
     try { if (navigator.clipboard) navigator.clipboard.writeText(json); } catch (e) {}
     toast("Backup saved and copied", false);
   });
+
+  // ---------- CSV / spreadsheet export ----------
+  function csvCell(v) {
+    if (v === null || v === undefined) return "";
+    var s = "" + v;
+    if (/[",\n\r]/.test(s)) s = '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+  function buildCsv() {
+    var cols = ["Date", "Weekday", "Drinks", "Clear", "Planned", "DayAfter", "Exercise", "Meeting", "Mood(1-5)"];
+    FEELINGS.forEach(function (f) { cols.push(f.label); });
+    cols.push("Occasion", "Reflection");
+    var wd = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+    var rows = [cols.join(",")];
+    Object.keys(db.days).sort().forEach(function (k) {
+      var e = db.days[k];
+      if (typeof e.drinks !== "number") return;
+      var fl = feelingsOf(e);
+      var row = [
+        k,
+        wd[parseKey(k).getDay()],
+        e.drinks,
+        e.drinks === 0 ? 1 : 0,
+        (e.planned && e.drinks >= 1) ? 1 : 0,
+        isProtectDay(k) ? 1 : 0,
+        e.exercise === true ? 1 : (e.exercise === false ? 0 : ""),
+        e.meeting === true ? 1 : (e.meeting === false ? 0 : ""),
+        typeof e.mood === "number" ? e.mood : ""
+      ];
+      FEELINGS.forEach(function (f) { row.push(fl.indexOf(f.key) >= 0 ? 1 : 0); });
+      row.push(e.plannedNote || "", e.note || "");
+      rows.push(row.map(csvCell).join(","));
+    });
+    return rows.join("\r\n");
+  }
+  document.getElementById("csvBtn").addEventListener("click", function () {
+    var csv = buildCsv();
+    if (csv.indexOf("\r\n") === -1) { toast("No logged days to export yet", false); return; }
+    var stamp = todayKey();
+    try {
+      var blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+      var fname = "cleardays-data-" + stamp + ".csv";
+      var file = null;
+      try { file = new File([blob], fname, { type: "text/csv" }); } catch (e) {}
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) {
+        navigator.share({ files: [file], title: "ClearDays data" }).catch(function () {});
+      } else {
+        var url = URL.createObjectURL(blob);
+        var a = document.createElement("a");
+        a.href = url; a.download = fname;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(function () { URL.revokeObjectURL(url); }, 1500);
+      }
+      toast("Spreadsheet exported", false);
+    } catch (e) { toast("Couldn't export", false); }
+  });
   document.getElementById("importBtn").addEventListener("click", function () {
     document.getElementById("importFile").click();
   });
@@ -1959,6 +2063,7 @@
         if (typeof it.e.drinks === "number") tags.push(it.e.drinks === 0 ? "clear" : markText(it.e.drinks) + (it.e.drinks === 1 ? " drink" : " drinks"));
         if (it.e.exercise === true) tags.push("exercise");
         if (it.e.meeting === true) tags.push("meeting");
+        feelingsOf(it.e).forEach(function (fk) { tags.push(feelingLabel(fk).toLowerCase()); });
         var pl = it.e.planned && it.e.drinks >= 1;
         html += '<div class="j-item' + (pl ? " j-planned" : "") + '" data-k="' + it.date + '"><div class="j-head">' + (pl ? "📅 " : "") + fmtLong(it.date) + (tags.length ? ' <span class="j-tag">' + tags.join(" · ") + '</span>' : '') + '</div><div class="j-note">' + esc(it.e.note) + '</div></div>';
       });
@@ -2019,7 +2124,7 @@
   function renderAll() { renderHero(); renderGoals(); renderCalendar(); renderMilestones(); }
 
   renderMeetings();
-  buildChips(); buildMoods(); renderAll();
+  buildChips(); buildMoods(); buildFeelings(); renderAll();
   checkMilestonePrompt();
 })();
 </script>
