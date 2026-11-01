@@ -354,6 +354,21 @@
   .j-item.j-streak { display: flex; align-items: center; justify-content: space-between; cursor: default; border-color: var(--teal); background: linear-gradient(160deg, #fff, rgba(34,92,99,0.07)); }
   .j-item.j-streak .j-head { margin-bottom: 0; }
   .j-del { border: 0; background: none; color: var(--berry); font-size: 12px; font-weight: 500; cursor: pointer; flex: 0 0 auto; padding: 2px 0 2px 10px; }
+  .j-compose { border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 14px; background: #fcfcfd; }
+  .j-compose textarea { min-height: 60px; margin: 0; }
+  .tagrow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 9px; }
+  .tagchip { border: 1px solid var(--line); background: #fff; border-radius: 999px; padding: 6px 12px; font-family: var(--sans); font-size: 12.5px; font-weight: 500; color: var(--muted); cursor: pointer; }
+  .tagchip.on { border-color: var(--blue); background: rgba(105,122,149,0.12); color: var(--blue-deep); }
+  .tagadd { display: flex; gap: 8px; margin-top: 8px; align-items: center; }
+  .tagadd input { flex: 1; min-width: 0; height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; font-family: var(--sans); font-size: 13.5px; color: var(--ink); background: #fff; }
+  .tagadd input:focus { outline: none; border-color: var(--blue); }
+  .compose-actions { display: flex; gap: 8px; margin-top: 10px; }
+  .compose-actions .btn { height: 44px; }
+  .jfilter { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 12px; }
+  .jfilter .tagchip { font-size: 12px; padding: 5px 11px; }
+  .j-tagbadge { display: inline-block; background: rgba(105,122,149,0.14); color: var(--blue-deep); border-radius: 999px; padding: 2px 9px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .j-entry .j-head { display: flex; align-items: center; gap: 6px; }
+  .j-entry .j-del { margin-left: auto; }
   .pl-block { margin-top: 8px; font-size: 12.5px; line-height: 1.45; color: var(--protect-ink); background: rgba(169,187,196,0.20); border: 1px solid var(--protect); border-radius: 10px; padding: 9px 11px; }
   .sheet-protect { margin: -2px 0 10px; font-size: 12.5px; line-height: 1.4; color: var(--protect-ink); background: rgba(169,187,196,0.20); border: 1px solid var(--protect); border-radius: 10px; padding: 9px 11px; text-align: center; }
   .sheet-protect b { font-weight: 600; }
@@ -628,7 +643,19 @@
 <div class="sheet" id="jSheet">
   <div class="grabber"></div>
   <h3>Journal</h3>
-  <div class="s-date">Your reflections and milestone notes, most recent first.</div>
+  <div class="s-date">Write a note any time of day. Your nightly check-in is also saved here as an Evening entry.</div>
+  <div class="j-compose">
+    <textarea id="entryText" placeholder="What's on your mind right now?"></textarea>
+    <div class="tagrow" id="entryTags"></div>
+    <div class="tagadd">
+      <input type="text" id="newTagInput" placeholder="Add a custom tag" maxlength="20" />
+      <button class="linkbtn" id="addTagBtn" type="button">Add</button>
+    </div>
+    <div class="compose-actions">
+      <button class="btn btn-ghost" id="entryCancel" type="button" style="display:none;">Cancel</button>
+      <button class="btn btn-primary" id="saveEntry" type="button" style="flex:1;">Add entry</button>
+    </div>
+  </div>
   <div id="journalList"></div>
   <div class="sheet-actions">
     <button class="btn btn-primary" id="jClose" style="flex: 1;">Done</button>
@@ -659,6 +686,8 @@
     if (!("lastSeenClear" in p)) p.lastSeenClear = null;
     if (!("mode" in p)) p.mode = "sobriety";
     if (!p.pastStreaks) p.pastStreaks = [];
+    if (!p.entries) p.entries = [];
+    if (!p.customTags) p.customTags = [];
     if (!p.protectDays || p.protectDays < 7) p.protectDays = 7;
     return p;
   }
@@ -1581,7 +1610,7 @@
       el.className = "mood"; el.textContent = f; el.setAttribute("data-mood", i + 1);
       el.addEventListener("click", function () {
         draft.mood = (draft.mood === i + 1) ? null : i + 1;
-        syncMoods();
+        syncMoods(); refreshSaveBtn();
       });
       wrap.appendChild(el);
     });
@@ -1614,7 +1643,7 @@
       el.addEventListener("click", function () {
         var i = draft.feelings.indexOf(f.key);
         if (i >= 0) draft.feelings.splice(i, 1); else draft.feelings.push(f.key);
-        syncFeelings();
+        syncFeelings(); refreshSaveBtn();
       });
       wrap.appendChild(el);
     });
@@ -1645,10 +1674,15 @@
     var ci = document.getElementById("drinkCustom");
     ci.value = (draft.drinks !== null && draft.drinks >= 8) ? draft.drinks : "";
   }
+  function draftHasAny() {
+    return draft.drinks !== null || draft.exercise !== null || draft.meeting !== null ||
+      draft.mood !== null || (draft.feelings && draft.feelings.length > 0) ||
+      (document.getElementById("note").value || "").trim() !== "" || draft.planned === true;
+  }
   function refreshSaveBtn() {
     var btn = document.getElementById("saveDay");
-    btn.disabled = draft.drinks === null;
-    btn.textContent = draft.drinks === 0 ? "Log clear day \u2726" : "Log day";
+    btn.disabled = !draftHasAny();
+    btn.textContent = draft.drinks === 0 ? "Log clear day \u2726" : (draft.drinks >= 1 ? "Log day" : "Save day");
   }
 
   function openSheet(k) {
@@ -1695,10 +1729,10 @@
       if (draft.drinks !== null && draft.drinks >= 8) { draft.drinks = null; refreshSaveBtn(); }
     }
   });
-  document.getElementById("exYes").addEventListener("click", function () { draft.exercise = draft.exercise === true ? null : true; syncToggles(); });
-  document.getElementById("exNo").addEventListener("click", function () { draft.exercise = draft.exercise === false ? null : false; syncToggles(); });
-  document.getElementById("mtYes").addEventListener("click", function () { draft.meeting = draft.meeting === true ? null : true; syncToggles(); });
-  document.getElementById("mtNo").addEventListener("click", function () { draft.meeting = draft.meeting === false ? null : false; syncToggles(); });
+  document.getElementById("exYes").addEventListener("click", function () { draft.exercise = draft.exercise === true ? null : true; syncToggles(); refreshSaveBtn(); });
+  document.getElementById("exNo").addEventListener("click", function () { draft.exercise = draft.exercise === false ? null : false; syncToggles(); refreshSaveBtn(); });
+  document.getElementById("mtYes").addEventListener("click", function () { draft.meeting = draft.meeting === true ? null : true; syncToggles(); refreshSaveBtn(); });
+  document.getElementById("mtNo").addEventListener("click", function () { draft.meeting = draft.meeting === false ? null : false; syncToggles(); refreshSaveBtn(); });
   document.getElementById("plToggle").addEventListener("click", function () {
     // Planned has to mean planned-ahead. Marking today or a past day as planned is a slip
     // being written off, so only allow it on a future date.
@@ -1707,20 +1741,22 @@
       return;
     }
     document.getElementById("plBlock").style.display = "none";
-    draft.planned = !draft.planned; syncToggles();
+    draft.planned = !draft.planned; syncToggles(); refreshSaveBtn();
   });
   document.getElementById("plannedNote").addEventListener("input", function () { draft.plannedNote = this.value; });
+  document.getElementById("note").addEventListener("input", refreshSaveBtn);
 
   document.getElementById("saveDay").addEventListener("click", function () {
-    if (draft.drinks === null || !curKey) return;
+    if (!curKey || !draftHasAny()) return;
     draft.note = document.getElementById("note").value.trim();
     var plannedDay = (draft.drinks >= 1 && draft.planned === true);
     db.days[curKey] = { drinks: draft.drinks, exercise: draft.exercise, meeting: draft.meeting, mood: draft.mood, feelings: draft.feelings.slice(), note: draft.note, planned: plannedDay, plannedNote: plannedDay ? (draft.plannedNote || "").trim() : "" };
     save();
     var dry = draft.drinks === 0;
+    var partial = draft.drinks === null;
     closeSheet();
     renderAll();
-    toast(dry ? "\u2726 Clear day logged. Nice work." : "Logged " + (draft.drinks === 7 ? "7+" : draft.drinks) + " drink" + (draft.drinks === 1 ? "" : "s"), dry);
+    toast(partial ? "Saved \u2014 add your drinks anytime" : (dry ? "\u2726 Clear day logged. Nice work." : "Logged " + (draft.drinks === 7 ? "7+" : draft.drinks) + " drink" + (draft.drinks === 1 ? "" : "s")), dry);
     checkMilestonePrompt();
   });
 
@@ -2011,7 +2047,83 @@
   });
 
   // ---------- Journal ----------
-  function openJournal() { renderJournal(); document.getElementById("jOverlay").classList.add("on"); document.getElementById("jSheet").classList.add("on"); }
+  // ---------- Timed journal entries ----------
+  var BUILTIN_TAGS = ["Morning", "Afternoon", "Evening", "Craving", "Other"];
+  var composeTag = "Evening";
+  var editingEntryId = null;
+  var journalFilter = "All";
+  function allTags() {
+    var out = BUILTIN_TAGS.slice();
+    (db.customTags || []).forEach(function (t) { if (out.indexOf(t) < 0) out.push(t); });
+    return out;
+  }
+  function timeBucketTag() {
+    var h = new Date().getHours();
+    return h < 12 ? "Morning" : (h < 17 ? "Afternoon" : "Evening");
+  }
+  function fmtDateTime(ts) {
+    var d = new Date(ts), h = d.getHours(), m = d.getMinutes();
+    var ap = h < 12 ? "AM" : "PM", h12 = h % 12; if (h12 === 0) h12 = 12;
+    return MONTHS_SHORT[d.getMonth()] + " " + d.getDate() + " · " + h12 + ":" + (m < 10 ? "0" + m : m) + " " + ap;
+  }
+  function buildEntryTags() {
+    var wrap = document.getElementById("entryTags");
+    wrap.innerHTML = "";
+    allTags().forEach(function (t) {
+      var b = document.createElement("button");
+      b.className = "tagchip" + (t === composeTag ? " on" : "");
+      b.type = "button"; b.textContent = t;
+      b.addEventListener("click", function () { composeTag = t; buildEntryTags(); });
+      wrap.appendChild(b);
+    });
+  }
+  function resetCompose() {
+    editingEntryId = null;
+    composeTag = timeBucketTag();
+    document.getElementById("entryText").value = "";
+    document.getElementById("newTagInput").value = "";
+    document.getElementById("entryCancel").style.display = "none";
+    document.getElementById("saveEntry").textContent = "Add entry";
+    buildEntryTags();
+  }
+  document.getElementById("addTagBtn").addEventListener("click", function () {
+    var inp = document.getElementById("newTagInput");
+    var t = inp.value.trim();
+    if (!t) { inp.focus(); return; }
+    if (allTags().map(function (x) { return x.toLowerCase(); }).indexOf(t.toLowerCase()) < 0) {
+      db.customTags.push(t); save();
+    }
+    composeTag = t; inp.value = ""; buildEntryTags();
+  });
+  document.getElementById("entryCancel").addEventListener("click", resetCompose);
+  document.getElementById("saveEntry").addEventListener("click", function () {
+    var text = document.getElementById("entryText").value.trim();
+    if (!text) { document.getElementById("entryText").focus(); toast("Write something first", false); return; }
+    if (editingEntryId) {
+      var e = (db.entries || []).filter(function (x) { return x.id === editingEntryId; })[0];
+      if (e) { e.text = text; e.tag = composeTag; }
+    } else {
+      db.entries.push({ id: Date.now() + "" + Math.floor(Math.random() * 999), ts: Date.now(), tag: composeTag, text: text });
+    }
+    save();
+    resetCompose();
+    renderJournal();
+    toast("Entry saved", false);
+  });
+  function editEntry(id) {
+    var e = (db.entries || []).filter(function (x) { return x.id === id; })[0];
+    if (!e) return;
+    editingEntryId = id;
+    composeTag = e.tag || "Other";
+    document.getElementById("entryText").value = e.text;
+    document.getElementById("entryCancel").style.display = "";
+    document.getElementById("saveEntry").textContent = "Update entry";
+    buildEntryTags();
+    document.getElementById("jSheet").scrollTo({ top: 0, behavior: "smooth" });
+    document.getElementById("entryText").focus();
+  }
+
+  function openJournal() { journalFilter = "All"; resetCompose(); renderJournal(); document.getElementById("jOverlay").classList.add("on"); document.getElementById("jSheet").classList.add("on"); }
   function closeJournal() { document.getElementById("jOverlay").classList.remove("on"); document.getElementById("jSheet").classList.remove("on"); }
   document.getElementById("openJournal").addEventListener("click", openJournal);
   document.getElementById("jClose").addEventListener("click", closeJournal);
@@ -2023,6 +2135,32 @@
       if (pstat.total > 0) {
         html += '<div class="j-record">Days-after held clear · <b>' + pstat.held + " / " + pstat.total + "</b></div>";
       }
+    }
+    var entries = (db.entries || []).slice().sort(function (a, b) { return b.ts - a.ts; });
+    var filtering = journalFilter && journalFilter !== "All";
+    // Filter bar — one chip per tag that actually has entries, plus All.
+    if (entries.length) {
+      var present = [];
+      entries.forEach(function (e) { var t = e.tag || "Other"; if (present.indexOf(t) < 0) present.push(t); });
+      html += '<div class="jfilter">';
+      html += '<button class="tagchip jchip' + (!filtering ? " on" : "") + '" data-tag="All">All</button>';
+      present.forEach(function (t) { html += '<button class="tagchip jchip' + (journalFilter === t ? " on" : "") + '" data-tag="' + esc(t) + '">' + esc(t) + '</button>'; });
+      html += '</div>';
+    }
+    var shown = filtering ? entries.filter(function (e) { return (e.tag || "Other") === journalFilter; }) : entries;
+    html += '<div class="j-section">Entries' + (filtering ? " · " + esc(journalFilter) : "") + '</div>';
+    if (shown.length) {
+      shown.forEach(function (en) {
+        html += '<div class="j-item j-entry" data-eid="' + en.id + '"><div class="j-head"><span class="j-tagbadge">' + esc(en.tag || "Other") + '</span><span class="j-tag"> · ' + fmtDateTime(en.ts) + '</span><button class="j-del" data-eid="' + en.id + '">✕</button></div><div class="j-note">' + esc(en.text) + '</div></div>';
+      });
+    } else {
+      html += '<div class="goals-empty">' + (filtering ? ('No "' + esc(journalFilter) + '" entries yet.') : "No entries yet — write one above and it'll show up here.") + '</div>';
+    }
+    if (filtering) {
+      var wrapF = document.getElementById("journalList");
+      wrapF.innerHTML = html;
+      bindJournalHandlers(wrapF);
+      return;
     }
     var streaks = (db.pastStreaks || []).slice().sort(function (a, b) { return a.to < b.to ? 1 : -1; });
     if (streaks.length) {
@@ -2065,12 +2203,17 @@
         if (it.e.meeting === true) tags.push("meeting");
         feelingsOf(it.e).forEach(function (fk) { tags.push(feelingLabel(fk).toLowerCase()); });
         var pl = it.e.planned && it.e.drinks >= 1;
-        html += '<div class="j-item' + (pl ? " j-planned" : "") + '" data-k="' + it.date + '"><div class="j-head">' + (pl ? "📅 " : "") + fmtLong(it.date) + (tags.length ? ' <span class="j-tag">' + tags.join(" · ") + '</span>' : '') + '</div><div class="j-note">' + esc(it.e.note) + '</div></div>';
+        html += '<div class="j-item' + (pl ? " j-planned" : "") + '" data-k="' + it.date + '"><div class="j-head"><span class="j-tagbadge">Evening</span> ' + (pl ? "📅 " : "") + fmtLong(it.date) + (tags.length ? ' <span class="j-tag">' + tags.join(" · ") + '</span>' : '') + '</div><div class="j-note">' + esc(it.e.note) + '</div></div>';
       });
     }
-    if (!html) html = '<div class="goals-empty">No notes yet. Add a reflection when you log a day, or a note when you reach a milestone.</div>';
     var wrap = document.getElementById("journalList");
     wrap.innerHTML = html;
+    bindJournalHandlers(wrap);
+  }
+  function bindJournalHandlers(wrap) {
+    Array.prototype.forEach.call(wrap.querySelectorAll(".jchip[data-tag]"), function (el) {
+      el.addEventListener("click", function () { journalFilter = el.getAttribute("data-tag"); renderJournal(); });
+    });
     Array.prototype.forEach.call(wrap.querySelectorAll(".j-item[data-k]"), function (el) {
       el.addEventListener("click", function () { closeJournal(); openSheet(el.getAttribute("data-k")); });
     });
@@ -2082,6 +2225,18 @@
         ev.stopPropagation();
         var sid = el.getAttribute("data-sid");
         db.pastStreaks = (db.pastStreaks || []).filter(function (x) { return x.id !== sid; });
+        save(); renderJournal();
+      });
+    });
+    Array.prototype.forEach.call(wrap.querySelectorAll(".j-entry[data-eid]"), function (el) {
+      el.addEventListener("click", function () { editEntry(el.getAttribute("data-eid")); });
+    });
+    Array.prototype.forEach.call(wrap.querySelectorAll(".j-del[data-eid]"), function (el) {
+      el.addEventListener("click", function (ev) {
+        ev.stopPropagation();
+        var eid = el.getAttribute("data-eid");
+        db.entries = (db.entries || []).filter(function (x) { return x.id !== eid; });
+        if (editingEntryId === eid) resetCompose();
         save(); renderJournal();
       });
     });
