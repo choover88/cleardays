@@ -638,9 +638,10 @@
   <div class="ms-body" id="mBody"></div>
   <div class="field-label">How do you feel?</div>
   <textarea id="mNote" placeholder="A note to your future self about reaching this..."></textarea>
+  <div class="s-date" style="margin-top:6px;">Saved to your journal with a Milestone tag.</div>
   <div class="sheet-actions">
     <button class="btn btn-ghost" id="mClose" style="width: 50px;">✕</button>
-    <button class="btn btn-primary" id="mSave">Save note</button>
+    <button class="btn btn-primary" id="mSave">Save to journal</button>
   </div>
 </div>
 
@@ -696,6 +697,20 @@
     if (!p.entries) p.entries = [];
     if (!p.customTags) p.customTags = [];
     if (!p.protectDays || p.protectDays < 7) p.protectDays = 7;
+    // One-time migration: old milestone notes become regular journal entries tagged "Milestone".
+    if (p.milestoneNotes) {
+      var mk = Object.keys(p.milestoneNotes);
+      if (mk.length) {
+        var base = Date.now();
+        mk.sort(function (a, b) { return (+a) - (+b); }).forEach(function (d, i) {
+          var txt = ("" + p.milestoneNotes[d]).trim();
+          if (txt) {
+            p.entries.push({ id: "ms" + d + "-" + base + i, ts: base - (mk.length - i) * 60000, tag: "Milestone", text: txt });
+          }
+        });
+        p.milestoneNotes = {};
+      }
+    }
     return p;
   }
   function load() {
@@ -861,6 +876,11 @@
   function countInMonth(y, m, field) {
     var pre = y + "-" + pad(m + 1) + "-", n = 0;
     for (var k in db.days) { if (k.indexOf(pre) === 0 && db.days[k][field] === true) n++; }
+    return n;
+  }
+  function clearInMonth(y, m) {
+    var pre = y + "-" + pad(m + 1) + "-", n = 0;
+    for (var k in db.days) { if (k.indexOf(pre) === 0 && db.days[k].drinks === 0) n++; }
     return n;
   }
   function yearStats(y) {
@@ -1287,11 +1307,6 @@
         if (future) cls.push("future");
         if (db.mode === "cutback" && isProtectDay(k)) cls.push("yprotect");
         if (k === tk) cls.push("today");
-        var col = j % 7;
-        if (!real(j - 7)) cls.push("eT");
-        if (!real(j + 7)) cls.push("eB");
-        if (col === 0 || !real(j - 1)) cls.push("eL");
-        if (col === 6 || !real(j + 1)) cls.push("eR");
         cell.className = cls.join(" ");
         if (mark) cell.innerHTML = '<span class="ynum">' + mark + '</span>';
         if (!future) (function (key) { cell.addEventListener("click", function () { openSheet(key); }); })(k);
@@ -1339,25 +1354,34 @@
     ctx.fillStyle = "#ffffff"; ctx.textBaseline = "alphabetic"; ctx.textAlign = "left";
     ctx.font = "700 24px Poppins, sans-serif"; ctx.fillText("ClearDays", pad, 44);
     ctx.globalAlpha = 0.9; ctx.font = "italic 300 14px Poppins, sans-serif"; ctx.fillText("one day at a time", pad, 64); ctx.globalAlpha = 1;
+    var streakNow = clearDays(), lines;
     if (m === "year") {
       ctx.font = "700 56px Poppins, sans-serif"; ctx.fillText("" + vy, pad, 128);
-      var ys = yearStats(vy), cdY = clearDays(), anchorY = clearAnchor();
-      ctx.textAlign = "right";
-      if (anchorY) {
-        ctx.font = "700 22px Poppins, sans-serif";
-        ctx.fillText(cdY + (cdY === 1 ? " clear day" : " clear days"), W - pad, 96);
-        ctx.globalAlpha = 0.92; ctx.font = "400 13px Poppins, sans-serif";
-        ctx.fillText("since " + fmtLong(anchorY), W - pad, 114);
-        ctx.fillText(ys.total + " drinks this year", W - pad, 132); ctx.globalAlpha = 1;
-      } else {
-        ctx.font = "500 15px Poppins, sans-serif";
-        ctx.fillText(ys.clear + " clear days · " + ys.total + " drinks", W - pad, 130);
-      }
+      var ys = yearStats(vy);
+      lines = [
+        streakNow + (streakNow === 1 ? " day" : " days") + " streak",
+        ys.clear + (ys.clear === 1 ? " clear day" : " clear days"),
+        ys.total + (ys.total === 1 ? " drink" : " drinks"),
+        ys.active + (ys.active === 1 ? " active day" : " active days")
+      ];
     } else {
-      ctx.font = "700 36px Poppins, sans-serif"; ctx.fillText(MONTHS[vm] + " " + vy, pad, 120);
-      ctx.textAlign = "right"; ctx.font = "500 14px Poppins, sans-serif";
-      ctx.fillText(drinksInMonth(vy, vm) + " drinks · " + countInMonth(vy, vm, "exercise") + " active", W - pad, 120);
+      ctx.font = "700 36px Poppins, sans-serif"; ctx.fillText(MONTHS[vm] + " " + vy, pad, 118);
+      var cm_ = clearInMonth(vy, vm), dm_ = drinksInMonth(vy, vm), am_ = countInMonth(vy, vm, "exercise");
+      lines = [
+        streakNow + (streakNow === 1 ? " day" : " days") + " streak",
+        cm_ + (cm_ === 1 ? " clear day" : " clear days"),
+        dm_ + (dm_ === 1 ? " drink" : " drinks"),
+        am_ + (am_ === 1 ? " active day" : " active days")
+      ];
     }
+    ctx.textAlign = "right";
+    var sy = 58;
+    lines.forEach(function (ln, i) {
+      ctx.font = (i === 0 ? "700 17px" : "500 13px") + " Poppins, sans-serif";
+      if (i > 0) ctx.globalAlpha = 0.93;
+      ctx.fillText(ln, W - pad, sy); ctx.globalAlpha = 1;
+      sy += (i === 0 ? 23 : 18);
+    });
     ctx.textAlign = "left";
 
     if (m === "year") {
@@ -1513,7 +1537,7 @@
     document.getElementById("mTitle").textContent = m.name + (on ? "  \u2713" : "");
     document.getElementById("mSub").textContent = m.d + (m.d === 1 ? " clear day · " : " clear days · ") + m.meaning;
     document.getElementById("mBody").textContent = m.body || "";
-    document.getElementById("mNote").value = (db.milestoneNotes && db.milestoneNotes[m.d]) || "";
+    document.getElementById("mNote").value = "";
     document.getElementById("mOverlay").classList.add("on");
     document.getElementById("mSheet").classList.add("on");
   }
@@ -2029,12 +2053,12 @@
   document.getElementById("mOverlay").addEventListener("click", closeMilestone);
   document.getElementById("mSave").addEventListener("click", function () {
     if (!curMs) return;
-    if (!db.milestoneNotes) db.milestoneNotes = {};
     var v = document.getElementById("mNote").value.trim();
-    if (v) db.milestoneNotes[curMs.d] = v; else delete db.milestoneNotes[curMs.d];
+    if (!v) { closeMilestone(); return; }
+    db.entries.push({ id: Date.now() + "" + Math.floor(Math.random() * 999), ts: Date.now(), tag: "Milestone", text: v });
     save();
     closeMilestone();
-    toast("Note saved", false);
+    toast("Saved to your journal ✦", true);
   });
 
   // ---------- Add meeting ----------
@@ -2063,6 +2087,8 @@
   function allTags() {
     var out = BUILTIN_TAGS.slice();
     (db.customTags || []).forEach(function (t) { if (out.indexOf(t) < 0) out.push(t); });
+    // Also offer any tag already used on an entry (e.g. "Milestone"), so it stays reselectable.
+    (db.entries || []).forEach(function (en) { if (en.tag && out.indexOf(en.tag) < 0) out.push(en.tag); });
     return out;
   }
   function timeBucketTag() {
@@ -2162,8 +2188,35 @@
       }
     }
     feed.sort(function (a, b) { return b.ts - a.ts; });
-
     var filtering = journalFilter && journalFilter !== "All";
+
+    // Collapsible summaries up top so they're one tap away.
+    if (!filtering) {
+      var streaks = (db.pastStreaks || []).slice().sort(function (a, b) { return a.to < b.to ? 1 : -1; });
+      if (streaks.length) {
+        var sb = "";
+        streaks.forEach(function (s) {
+          sb += '<div class="j-item j-streak"><div class="j-head">' + s.days + (s.days === 1 ? " day" : " days") +
+            ' <span class="j-tag">' + fmtLong(s.from) + " – " + fmtLong(s.to) + '</span></div>' +
+            '<button class="j-del" data-sid="' + s.id + '">Remove</button></div>';
+        });
+        html += accSection("streaks", "Past streaks", streaks.length, sb);
+      }
+      var planned = [];
+      for (var pk in db.days) { var pe = db.days[pk]; if (pe.planned && pe.drinks >= 1) planned.push({ date: pk, e: pe }); }
+      planned.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      if (planned.length) {
+        var pb = "";
+        planned.forEach(function (it) {
+          var occ = (it.e.plannedNote && it.e.plannedNote.trim()) ? esc(it.e.plannedNote) : "Planned day";
+          var dr = markText(it.e.drinks) + (it.e.drinks === 1 ? " drink" : " drinks");
+          pb += '<div class="j-item j-planned" data-k="' + it.date + '"><div class="j-head">📅 ' + fmtLong(it.date) + ' <span class="j-tag">' + dr + '</span></div><div class="j-note">' + occ + '</div></div>';
+        });
+        html += accSection("planned", "Planned days", planned.length, pb);
+      }
+    }
+
+    // Filter bar
     if (feed.length) {
       var present = [];
       feed.forEach(function (f) { if (present.indexOf(f.tag) < 0) present.push(f.tag); });
@@ -2190,41 +2243,6 @@
       });
     } else {
       html += '<div class="goals-empty">' + (filtering ? ('No "' + esc(journalFilter) + '" entries yet.') : "No entries yet — write one above and it'll show up here.") + '</div>';
-    }
-
-    if (!filtering) {
-      var streaks = (db.pastStreaks || []).slice().sort(function (a, b) { return a.to < b.to ? 1 : -1; });
-      if (streaks.length) {
-        var sb = "";
-        streaks.forEach(function (s) {
-          sb += '<div class="j-item j-streak"><div class="j-head">' + s.days + (s.days === 1 ? " day" : " days") +
-            ' <span class="j-tag">' + fmtLong(s.from) + " – " + fmtLong(s.to) + '</span></div>' +
-            '<button class="j-del" data-sid="' + s.id + '">Remove</button></div>';
-        });
-        html += accSection("streaks", "Past streaks", streaks.length, sb);
-      }
-      var mnotes = db.milestoneNotes || {};
-      var mkeys = Object.keys(mnotes).filter(function (d) { return mnotes[d] && ("" + mnotes[d]).trim(); });
-      if (mkeys.length) {
-        var mb = "";
-        mkeys.sort(function (a, b) { return (+a) - (+b); }).forEach(function (d) {
-          var m = MILESTONES.filter(function (x) { return x.d == d; })[0];
-          mb += '<div class="j-item j-ms" data-ms="' + d + '"><div class="j-head">' + (m ? m.name : d + " days") + '</div><div class="j-note">' + esc(mnotes[d]) + '</div></div>';
-        });
-        html += accSection("milestones", "Milestone notes", mkeys.length, mb);
-      }
-      var planned = [];
-      for (var pk in db.days) { var pe = db.days[pk]; if (pe.planned && pe.drinks >= 1) planned.push({ date: pk, e: pe }); }
-      planned.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
-      if (planned.length) {
-        var pb = "";
-        planned.forEach(function (it) {
-          var occ = (it.e.plannedNote && it.e.plannedNote.trim()) ? esc(it.e.plannedNote) : "Planned day";
-          var dr = markText(it.e.drinks) + (it.e.drinks === 1 ? " drink" : " drinks");
-          pb += '<div class="j-item j-planned" data-k="' + it.date + '"><div class="j-head">📅 ' + fmtLong(it.date) + ' <span class="j-tag">' + dr + '</span></div><div class="j-note">' + occ + '</div></div>';
-        });
-        html += accSection("planned", "Planned days", planned.length, pb);
-      }
     }
 
     var wrap = document.getElementById("journalList");
