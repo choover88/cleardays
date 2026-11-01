@@ -364,6 +364,12 @@
   .tagadd input:focus { outline: none; border-color: var(--blue); }
   .compose-actions { display: flex; gap: 8px; margin-top: 10px; }
   .compose-actions .btn { height: 44px; }
+  .j-acc { border-top: 1px solid var(--line-soft); margin-top: 6px; }
+  .j-acc-head { width: 100%; border: 0; background: none; cursor: pointer; display: flex; align-items: center; gap: 8px; padding: 14px 2px; font-family: var(--brand); font-weight: 700; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.4px; }
+  .j-acc-count { color: var(--blue); font-family: var(--sans); font-weight: 600; font-size: 12px; text-transform: none; letter-spacing: 0; }
+  .j-acc-caret { display: inline-block; transition: transform 0.18s; color: var(--muted); font-size: 11px; }
+  .j-acc-caret.open { transform: rotate(90deg); }
+  .j-acc-body { padding-bottom: 6px; }
   .jfilter { display: flex; flex-wrap: wrap; gap: 6px; margin: 2px 0 12px; }
   .jfilter .tagchip { font-size: 12px; padding: 5px 11px; }
   .j-tagbadge { display: inline-block; background: rgba(105,122,149,0.14); color: var(--blue-deep); border-radius: 999px; padding: 2px 9px; font-size: 11px; font-weight: 600; white-space: nowrap; }
@@ -642,6 +648,7 @@
 <div class="overlay" id="jOverlay"></div>
 <div class="sheet" id="jSheet">
   <div class="grabber"></div>
+  <button class="sheet-x" id="jCloseX" type="button" aria-label="Close journal">✕</button>
   <h3>Journal</h3>
   <div class="s-date">Write a note any time of day. Your nightly check-in is also saved here as an Evening entry.</div>
   <div class="j-compose">
@@ -2048,10 +2055,11 @@
 
   // ---------- Journal ----------
   // ---------- Timed journal entries ----------
-  var BUILTIN_TAGS = ["Morning", "Afternoon", "Evening", "Craving", "Other"];
+  var BUILTIN_TAGS = ["Morning", "Afternoon", "Evening", "Craving"];
   var composeTag = "Evening";
   var editingEntryId = null;
   var journalFilter = "All";
+  var accOpen = { streaks: false, milestones: false, planned: false };
   function allTags() {
     var out = BUILTIN_TAGS.slice();
     (db.customTags || []).forEach(function (t) { if (out.indexOf(t) < 0) out.push(t); });
@@ -2114,7 +2122,7 @@
     var e = (db.entries || []).filter(function (x) { return x.id === id; })[0];
     if (!e) return;
     editingEntryId = id;
-    composeTag = e.tag || "Other";
+    composeTag = e.tag || timeBucketTag();
     document.getElementById("entryText").value = e.text;
     document.getElementById("entryCancel").style.display = "";
     document.getElementById("saveEntry").textContent = "Update entry";
@@ -2123,11 +2131,18 @@
     document.getElementById("entryText").focus();
   }
 
-  function openJournal() { journalFilter = "All"; resetCompose(); renderJournal(); document.getElementById("jOverlay").classList.add("on"); document.getElementById("jSheet").classList.add("on"); }
+  function openJournal() { journalFilter = "All"; accOpen = { streaks: false, milestones: false, planned: false }; resetCompose(); renderJournal(); document.getElementById("jOverlay").classList.add("on"); document.getElementById("jSheet").classList.add("on"); }
   function closeJournal() { document.getElementById("jOverlay").classList.remove("on"); document.getElementById("jSheet").classList.remove("on"); }
   document.getElementById("openJournal").addEventListener("click", openJournal);
   document.getElementById("jClose").addEventListener("click", closeJournal);
+  document.getElementById("jCloseX").addEventListener("click", closeJournal);
   document.getElementById("jOverlay").addEventListener("click", closeJournal);
+  function accSection(key, title, count, bodyHtml) {
+    var open = !!accOpen[key];
+    return '<div class="j-acc">' +
+      '<button class="j-acc-head" data-acc="' + key + '"><span class="j-acc-caret' + (open ? " open" : "") + '">▸</span>' + title + ' <span class="j-acc-count">' + count + '</span></button>' +
+      '<div class="j-acc-body" data-accbody="' + key + '" style="' + (open ? "" : "display:none;") + '">' + bodyHtml + '</div></div>';
+  }
   function renderJournal() {
     var html = "";
     if (db.mode === "cutback") {
@@ -2136,76 +2151,82 @@
         html += '<div class="j-record">Days-after held clear · <b>' + pstat.held + " / " + pstat.total + "</b></div>";
       }
     }
-    var entries = (db.entries || []).slice().sort(function (a, b) { return b.ts - a.ts; });
+    // One merged feed: timed entries + nightly check-in reflections (tagged Evening).
+    var feed = [];
+    (db.entries || []).forEach(function (en) { feed.push({ kind: "entry", id: en.id, ts: en.ts, tag: en.tag || "Note", text: en.text }); });
+    for (var k in db.days) {
+      var de = db.days[k];
+      if (de.note && de.note.trim()) {
+        var pd = parseKey(k);
+        feed.push({ kind: "day", key: k, ts: new Date(pd.getFullYear(), pd.getMonth(), pd.getDate(), 20, 0, 0).getTime(), tag: "Evening", text: de.note, e: de });
+      }
+    }
+    feed.sort(function (a, b) { return b.ts - a.ts; });
+
     var filtering = journalFilter && journalFilter !== "All";
-    // Filter bar — one chip per tag that actually has entries, plus All.
-    if (entries.length) {
+    if (feed.length) {
       var present = [];
-      entries.forEach(function (e) { var t = e.tag || "Other"; if (present.indexOf(t) < 0) present.push(t); });
+      feed.forEach(function (f) { if (present.indexOf(f.tag) < 0) present.push(f.tag); });
       html += '<div class="jfilter">';
       html += '<button class="tagchip jchip' + (!filtering ? " on" : "") + '" data-tag="All">All</button>';
       present.forEach(function (t) { html += '<button class="tagchip jchip' + (journalFilter === t ? " on" : "") + '" data-tag="' + esc(t) + '">' + esc(t) + '</button>'; });
       html += '</div>';
     }
-    var shown = filtering ? entries.filter(function (e) { return (e.tag || "Other") === journalFilter; }) : entries;
+    var shown = filtering ? feed.filter(function (f) { return f.tag === journalFilter; }) : feed;
     html += '<div class="j-section">Entries' + (filtering ? " · " + esc(journalFilter) : "") + '</div>';
     if (shown.length) {
-      shown.forEach(function (en) {
-        html += '<div class="j-item j-entry" data-eid="' + en.id + '"><div class="j-head"><span class="j-tagbadge">' + esc(en.tag || "Other") + '</span><span class="j-tag"> · ' + fmtDateTime(en.ts) + '</span><button class="j-del" data-eid="' + en.id + '">✕</button></div><div class="j-note">' + esc(en.text) + '</div></div>';
+      shown.forEach(function (f) {
+        if (f.kind === "entry") {
+          html += '<div class="j-item j-entry" data-eid="' + f.id + '"><div class="j-head"><span class="j-tagbadge">' + esc(f.tag) + '</span><span class="j-tag"> · ' + fmtDateTime(f.ts) + '</span><button class="j-del" data-eid="' + f.id + '">✕</button></div><div class="j-note">' + esc(f.text) + '</div></div>';
+        } else {
+          var tags = [];
+          if (typeof f.e.drinks === "number") tags.push(f.e.drinks === 0 ? "clear" : markText(f.e.drinks) + (f.e.drinks === 1 ? " drink" : " drinks"));
+          if (f.e.exercise === true) tags.push("exercise");
+          if (f.e.meeting === true) tags.push("meeting");
+          feelingsOf(f.e).forEach(function (fk) { tags.push(feelingLabel(fk).toLowerCase()); });
+          var pl = f.e.planned && f.e.drinks >= 1;
+          html += '<div class="j-item' + (pl ? " j-planned" : "") + '" data-k="' + f.key + '"><div class="j-head"><span class="j-tagbadge">Evening</span><span class="j-tag"> · ' + (pl ? "📅 " : "") + fmtLong(f.key) + (tags.length ? " · " + tags.join(" · ") : "") + '</span></div><div class="j-note">' + esc(f.e.note) + '</div></div>';
+        }
       });
     } else {
       html += '<div class="goals-empty">' + (filtering ? ('No "' + esc(journalFilter) + '" entries yet.') : "No entries yet — write one above and it'll show up here.") + '</div>';
     }
-    if (filtering) {
-      var wrapF = document.getElementById("journalList");
-      wrapF.innerHTML = html;
-      bindJournalHandlers(wrapF);
-      return;
+
+    if (!filtering) {
+      var streaks = (db.pastStreaks || []).slice().sort(function (a, b) { return a.to < b.to ? 1 : -1; });
+      if (streaks.length) {
+        var sb = "";
+        streaks.forEach(function (s) {
+          sb += '<div class="j-item j-streak"><div class="j-head">' + s.days + (s.days === 1 ? " day" : " days") +
+            ' <span class="j-tag">' + fmtLong(s.from) + " – " + fmtLong(s.to) + '</span></div>' +
+            '<button class="j-del" data-sid="' + s.id + '">Remove</button></div>';
+        });
+        html += accSection("streaks", "Past streaks", streaks.length, sb);
+      }
+      var mnotes = db.milestoneNotes || {};
+      var mkeys = Object.keys(mnotes).filter(function (d) { return mnotes[d] && ("" + mnotes[d]).trim(); });
+      if (mkeys.length) {
+        var mb = "";
+        mkeys.sort(function (a, b) { return (+a) - (+b); }).forEach(function (d) {
+          var m = MILESTONES.filter(function (x) { return x.d == d; })[0];
+          mb += '<div class="j-item j-ms" data-ms="' + d + '"><div class="j-head">' + (m ? m.name : d + " days") + '</div><div class="j-note">' + esc(mnotes[d]) + '</div></div>';
+        });
+        html += accSection("milestones", "Milestone notes", mkeys.length, mb);
+      }
+      var planned = [];
+      for (var pk in db.days) { var pe = db.days[pk]; if (pe.planned && pe.drinks >= 1) planned.push({ date: pk, e: pe }); }
+      planned.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
+      if (planned.length) {
+        var pb = "";
+        planned.forEach(function (it) {
+          var occ = (it.e.plannedNote && it.e.plannedNote.trim()) ? esc(it.e.plannedNote) : "Planned day";
+          var dr = markText(it.e.drinks) + (it.e.drinks === 1 ? " drink" : " drinks");
+          pb += '<div class="j-item j-planned" data-k="' + it.date + '"><div class="j-head">📅 ' + fmtLong(it.date) + ' <span class="j-tag">' + dr + '</span></div><div class="j-note">' + occ + '</div></div>';
+        });
+        html += accSection("planned", "Planned days", planned.length, pb);
+      }
     }
-    var streaks = (db.pastStreaks || []).slice().sort(function (a, b) { return a.to < b.to ? 1 : -1; });
-    if (streaks.length) {
-      html += '<div class="j-section">Past streaks</div>';
-      streaks.forEach(function (s) {
-        html += '<div class="j-item j-streak"><div class="j-head">' + s.days + (s.days === 1 ? " day" : " days") +
-          ' <span class="j-tag">' + fmtLong(s.from) + " – " + fmtLong(s.to) + '</span></div>' +
-          '<button class="j-del" data-sid="' + s.id + '">Remove</button></div>';
-      });
-    }
-    var mnotes = db.milestoneNotes || {};
-    var mkeys = Object.keys(mnotes).filter(function (d) { return mnotes[d] && ("" + mnotes[d]).trim(); });
-    if (mkeys.length) {
-      html += '<div class="j-section">Milestone notes</div>';
-      mkeys.sort(function (a, b) { return (+a) - (+b); }).forEach(function (d) {
-        var m = MILESTONES.filter(function (x) { return x.d == d; })[0];
-        html += '<div class="j-item j-ms" data-ms="' + d + '"><div class="j-head">' + (m ? m.name : d + " days") + '</div><div class="j-note">' + esc(mnotes[d]) + '</div></div>';
-      });
-    }
-    var planned = [];
-    for (var pk in db.days) { var pe = db.days[pk]; if (pe.planned && pe.drinks >= 1) planned.push({ date: pk, e: pe }); }
-    planned.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
-    if (planned.length) {
-      html += '<div class="j-section">Planned days</div>';
-      planned.forEach(function (it) {
-        var occ = (it.e.plannedNote && it.e.plannedNote.trim()) ? esc(it.e.plannedNote) : "Planned day";
-        var dr = markText(it.e.drinks) + (it.e.drinks === 1 ? " drink" : " drinks");
-        html += '<div class="j-item j-planned" data-k="' + it.date + '"><div class="j-head">📅 ' + fmtLong(it.date) + ' <span class="j-tag">' + dr + '</span></div><div class="j-note">' + occ + '</div></div>';
-      });
-    }
-    var items = [];
-    for (var k in db.days) { var e = db.days[k]; if (e.note && e.note.trim()) items.push({ date: k, e: e }); }
-    items.sort(function (a, b) { return a.date < b.date ? 1 : -1; });
-    if (items.length) {
-      html += '<div class="j-section">Daily reflections</div>';
-      items.forEach(function (it) {
-        var tags = [];
-        if (typeof it.e.drinks === "number") tags.push(it.e.drinks === 0 ? "clear" : markText(it.e.drinks) + (it.e.drinks === 1 ? " drink" : " drinks"));
-        if (it.e.exercise === true) tags.push("exercise");
-        if (it.e.meeting === true) tags.push("meeting");
-        feelingsOf(it.e).forEach(function (fk) { tags.push(feelingLabel(fk).toLowerCase()); });
-        var pl = it.e.planned && it.e.drinks >= 1;
-        html += '<div class="j-item' + (pl ? " j-planned" : "") + '" data-k="' + it.date + '"><div class="j-head"><span class="j-tagbadge">Evening</span> ' + (pl ? "📅 " : "") + fmtLong(it.date) + (tags.length ? ' <span class="j-tag">' + tags.join(" · ") + '</span>' : '') + '</div><div class="j-note">' + esc(it.e.note) + '</div></div>';
-      });
-    }
+
     var wrap = document.getElementById("journalList");
     wrap.innerHTML = html;
     bindJournalHandlers(wrap);
@@ -2213,6 +2234,16 @@
   function bindJournalHandlers(wrap) {
     Array.prototype.forEach.call(wrap.querySelectorAll(".jchip[data-tag]"), function (el) {
       el.addEventListener("click", function () { journalFilter = el.getAttribute("data-tag"); renderJournal(); });
+    });
+    Array.prototype.forEach.call(wrap.querySelectorAll(".j-acc-head[data-acc]"), function (el) {
+      el.addEventListener("click", function () {
+        var key = el.getAttribute("data-acc");
+        accOpen[key] = !accOpen[key];
+        var body = wrap.querySelector('.j-acc-body[data-accbody="' + key + '"]');
+        if (body) body.style.display = accOpen[key] ? "" : "none";
+        var caret = el.querySelector(".j-acc-caret");
+        if (caret) caret.classList.toggle("open", accOpen[key]);
+      });
     });
     Array.prototype.forEach.call(wrap.querySelectorAll(".j-item[data-k]"), function (el) {
       el.addEventListener("click", function () { closeJournal(); openSheet(el.getAttribute("data-k")); });
