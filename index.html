@@ -2272,6 +2272,7 @@
     Array.prototype.forEach.call(wrap.querySelectorAll(".j-del[data-sid]"), function (el) {
       el.addEventListener("click", function (ev) {
         ev.stopPropagation();
+        if (!confirm("Remove this saved streak from your history? This can't be undone.")) return;
         var sid = el.getAttribute("data-sid");
         db.pastStreaks = (db.pastStreaks || []).filter(function (x) { return x.id !== sid; });
         save(); renderJournal();
@@ -2283,6 +2284,7 @@
     Array.prototype.forEach.call(wrap.querySelectorAll(".j-del[data-eid]"), function (el) {
       el.addEventListener("click", function (ev) {
         ev.stopPropagation();
+        if (!confirm("Delete this entry? This can't be undone.")) return;
         var eid = el.getAttribute("data-eid");
         db.entries = (db.entries || []).filter(function (x) { return x.id !== eid; });
         if (editingEntryId === eid) resetCompose();
